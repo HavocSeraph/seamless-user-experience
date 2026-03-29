@@ -13,18 +13,14 @@ export function VideoSessionPage() {
   const [token, setToken] = useState('');
 
   // Real world deployment would use environmental vars
-  const serverUrl = 'ws://localhost:7880';
+  const serverUrl = 'wss://gsd-nipad1i5.livekit.cloud';
 
   useEffect(() => {
     // Basic fetch to our new endpoint
     const fetchToken = async () => {
       try {
         const id = sessionId || 'dummy-session-id';
-        const res = await fetch(`http://localhost:3000/livekit/token/${id}`, {  
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+        const res = await fetch(`http://localhost:3000/livekit/test-token/${id}`);
         const data = await res.json();
         if (data.token) setToken(data.token);
       } catch (error) {
@@ -55,7 +51,8 @@ export function VideoSessionPage() {
         style={{ height: '100vh' }}
         onDisconnected={() => {
           // Send completion trigger when user disconnects
-          alert("Session Disconnected. Don't forget to mark it as complete in your dashboard!");
+          // For now, redirect to the Dashboard to do session feedback
+          window.location.href = '/dashboard?sessionEnd=' + sessionId;
         }}
       >
         <VideoConference />

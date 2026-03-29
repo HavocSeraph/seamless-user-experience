@@ -66,6 +66,7 @@ model User {
   id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email           String         @unique @db.VarChar(255)
   passwordHash    String         @db.VarChar(255)
+  name            String         @db.VarChar(255)
   tokenBalance    Int            @default(50)
   reputationScore Decimal        @default(0.00) @db.Decimal(3, 2)
   isVerified      Boolean        @default(false)

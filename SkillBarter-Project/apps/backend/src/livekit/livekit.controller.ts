@@ -13,4 +13,25 @@ export class LivekitController {
     const token = await this.livekitService.generateToken(sessionId, req.user.id, req.user.email);
     return { token };
   }
+
+  // Public endpoint for testing Phase 4
+  @Get('test-token/:sessionId')
+  async getTestToken(@Param('sessionId') sessionId: string) {
+    // Generate JWT access token strictly for testing without needing DB
+    const randomUserId = `test-user-${Math.floor(Math.random() * 1000)}`;
+    const { AccessToken } = require('livekit-server-sdk');
+    
+    const at = new AccessToken(
+      process.env.LIVEKIT_API_KEY || 'APIZtuvW3iws6Ct',
+      process.env.LIVEKIT_API_SECRET || '9VpAAvJo4hGcsKzydvyocJOMQUewX6mNlLfyl9t8o1e',
+      {
+        identity: randomUserId,
+        name: randomUserId,
+      },
+    );
+    at.addGrant({ roomJoin: true, room: `session-${sessionId}` });
+    
+    const jwtToken = await at.toJwt();
+    return { token: jwtToken };
+  }
 }

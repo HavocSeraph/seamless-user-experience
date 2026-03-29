@@ -39,6 +39,6 @@ export class LivekitService {
       });
     }
 
-    return at.toJwt();
+    return await at.toJwt();
   }
 }

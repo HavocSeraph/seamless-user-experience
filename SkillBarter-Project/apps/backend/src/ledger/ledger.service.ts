@@ -79,7 +79,9 @@ export class LedgerService {
   async releaseEscrow(sessionId: string): Promise<void> {
     const escrow = await this.prisma.escrow.findUnique({ where: { sessionId } });
     if (!escrow) throw new NotFoundException('Escrow not found');
-    if (escrow.status !== EscrowStatus.LOCKED) throw new BadRequestException('Escrow is not locked');
+    if (escrow.status !== EscrowStatus.LOCKED && escrow.status !== EscrowStatus.DISPUTED) {
+      throw new BadRequestException('Escrow is not locked or disputed');
+    }
 
     const session = await this.prisma.session.findUnique({ where: { id: sessionId } });
     if (!session) throw new NotFoundException('Session not found');
@@ -129,7 +131,9 @@ export class LedgerService {
   async refundEscrow(sessionId: string): Promise<void> {
     const escrow = await this.prisma.escrow.findUnique({ where: { sessionId } });
     if (!escrow) throw new NotFoundException('Escrow not found');
-    if (escrow.status !== EscrowStatus.LOCKED) throw new BadRequestException('Escrow is not locked');
+    if (escrow.status !== EscrowStatus.LOCKED && escrow.status !== EscrowStatus.DISPUTED) {
+      throw new BadRequestException('Escrow is not locked or disputed');
+    }
 
     const session = await this.prisma.session.findUnique({ where: { id: sessionId } });
     if (!session) throw new NotFoundException('Session not found');
@@ -150,6 +154,63 @@ export class LedgerService {
       await tx.escrow.update({
         where: { sessionId },
         data: { status: EscrowStatus.REFUNDED, resolvedAt: new Date() }
+      });
+    });
+  }
+
+  async splitEscrow(sessionId: string): Promise<void> {
+    const escrow = await this.prisma.escrow.findUnique({ where: { sessionId } });
+    if (!escrow) throw new NotFoundException('Escrow not found');
+    if (escrow.status !== EscrowStatus.LOCKED && escrow.status !== EscrowStatus.DISPUTED) {
+      throw new BadRequestException('Escrow is not locked or disputed');
+    }
+
+    const session = await this.prisma.session.findUnique({ where: { id: sessionId } });
+    if (!session) throw new NotFoundException('Session not found');
+
+    const adminUser = await this.prisma.user.findFirst({ where: { role: Role.ADMIN } });
+    if (!adminUser) throw new NotFoundException('System Admin wallet not configured');
+
+    const half = Math.floor(escrow.amount / 2);
+    const tax = Math.floor(half * 0.05);
+    const mentorReceives = half - tax;
+    const studentReceives = escrow.amount - half;
+
+    await this.prisma.$transaction(async (tx) => {
+      // Mentor gets half minus tax
+      await tx.user.update({
+        where: { id: session.mentorId },
+        data: { tokenBalance: { increment: mentorReceives } }
+      });
+      // Student gets exact half back (refunded, no tax)
+      await tx.user.update({
+        where: { id: session.studentId },
+        data: { tokenBalance: { increment: studentReceives } }
+      });
+      // Admin gets the tax
+      if (tax > 0) {
+        await tx.user.update({
+          where: { id: adminUser.id },
+          data: { tokenBalance: { increment: tax } }
+        });
+      }
+
+      await tx.transaction.create({
+        data: { toUserId: session.mentorId, amount: mentorReceives, type: TransactionType.ESCROW_RELEASE, referenceId: sessionId }
+      });
+      await tx.transaction.create({
+        data: { toUserId: session.studentId, amount: studentReceives, type: TransactionType.ESCROW_RELEASE, referenceId: sessionId }
+      });
+
+      if (tax > 0) {
+        await tx.transaction.create({
+          data: { toUserId: adminUser.id, amount: tax, type: TransactionType.TAX, referenceId: sessionId }
+        });
+      }
+
+      await tx.escrow.update({
+        where: { sessionId },
+        data: { status: EscrowStatus.RELEASED, resolvedAt: new Date() }
       });
     });
   }
