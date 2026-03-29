@@ -1,0 +1,1 @@
+{"root":["./vite.config.ts","./src/app.tsx","./src/main.tsx","./src/components/bookingmodal.tsx","./src/hooks/usedebounce.ts","./src/lib/utils.ts","./src/pages/marketplacepage.tsx","./src/pages/videosessionpage.tsx","./src/pages/walletpage.tsx"],"errors":true,"version":"5.9.3"}
