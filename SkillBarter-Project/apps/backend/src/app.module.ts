@@ -21,7 +21,7 @@ import { APP_GUARD } from '@nestjs/core';
         redact: ['req.headers.authorization', 'req.headers.cookie', 'req.body.password'],
       }
     }),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 1000 }]),
     PrismaModule,
     AuthModule,
     LedgerModule,
