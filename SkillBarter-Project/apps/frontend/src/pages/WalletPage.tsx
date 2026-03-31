@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Flame, Star, Coins } from 'lucide-react';
 import axios from 'axios';
+import CountUp from 'react-countup';
 
 // Mocking custom fetcher assuming auth interceptor exists
 const api = axios.create({ baseURL: 'http://localhost:3000' });
@@ -40,7 +41,7 @@ export function WalletPage() {
           <h2 className="text-lg font-semibold opacity-90">Current Balance</h2> 
           <div className="text-5xl font-bold flex items-center gap-2 mt-2">     
             <Coins size={40} />
-            {balanceData?.balance ?? 0}
+            <CountUp end={balanceData?.balance ?? 0} duration={2} separator="," />
           </div>
         </div>
         <div className="flex gap-6 text-right">

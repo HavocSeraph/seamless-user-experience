@@ -65,14 +65,18 @@ export class AuthService {
   }
 
   async generateTokens(userId: string, role: string) {
+    if (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET) {
+      throw new Error('JWT secrets are not defined in environment variables');
+    }
+
     const payload = { sub: userId, role };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_ACCESS_SECRET || 'super_secret_access_key',
+        secret: process.env.JWT_ACCESS_SECRET,
         expiresIn: '15m',
       }),
       this.jwtService.signAsync(payload, {
-        secret: process.env.JWT_REFRESH_SECRET || 'super_secret_refresh_key',
+        secret: process.env.JWT_REFRESH_SECRET,
         expiresIn: '7d',
       }),
     ]);
@@ -95,5 +99,22 @@ export class AuthService {
       }
     });
     return user;
+  }
+
+  async refreshToken(refreshToken: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+
+      const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+      if (!user || user.isBanned) {
+        throw new UnauthorizedException('User no longer valid or banned');
+      }
+
+      return this.generateTokens(user.id, user.role);
+    } catch (e) {
+      throw new UnauthorizedException('Refresh token is invalid or expired');
+    }
   }
 }

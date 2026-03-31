@@ -5,6 +5,9 @@ import { MarketplacePage } from './pages/MarketplacePage';
 import { WalletPage } from './pages/WalletPage';
 import { VideoSessionPage } from './pages/VideoSessionPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { BountyBoardPage } from './pages/bounties/BountyBoardPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { NotificationBell } from './components/layout/NotificationBell';
 
 const queryClient = new QueryClient();
 
@@ -20,8 +23,11 @@ function Layout({ children }: { children: React.ReactNode }) {
           <div className="hidden md:flex gap-8 items-center bg-gray-100 dark:bg-gray-900/80 px-8 py-2.5 rounded-full border border-gray-200 dark:border-gray-800 shadow-inner">
             <Link to="/marketplace" className="text-sm font-semibold text-gray-400 hover:text-indigo-400 transition-colors">Marketplace</Link>
             <Link to="/dashboard" className="text-sm font-semibold text-gray-400 hover:text-indigo-400 transition-colors">Dashboard</Link>
-            <Link to="/wallet" className="text-sm font-semibold text-gray-400 hover:text-indigo-400 transition-colors">Wallet</Link>              <Link to="/admin" className="text-sm font-semibold text-red-500 hover:text-red-400 transition-colors">Admin</Link>          </div>
+            <Link to="/wallet" className="text-sm font-semibold text-gray-400 hover:text-indigo-400 transition-colors">Wallet</Link>
+            <Link to="/bounties" className="text-sm font-semibold text-gray-400 hover:text-indigo-400 transition-colors">Bounties</Link>
+            <Link to="/admin" className="text-sm font-semibold text-red-500 hover:text-red-400 transition-colors">Admin</Link>          </div>
           <div className="flex items-center gap-4">
+             <NotificationBell />
              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-gray-700 to-gray-800 border border-gray-600 flex items-center justify-center cursor-pointer hover:border-indigo-500 transition-all shadow-md">
                <span className="text-sm font-bold text-gray-200">ME</span>
              </div>
@@ -35,8 +41,6 @@ function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-import { AdminDashboardPage } from './pages/AdminDashboardPage';
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -45,7 +49,9 @@ function App() {
           <Route path="/" element={<Layout><div className="p-8 text-center text-3xl font-bold">Welcome to SkillBarter!</div></Layout>} />
           <Route path="/marketplace" element={<Layout><MarketplacePage /></Layout>} />
           <Route path="/dashboard" element={<Layout><DashboardPage /></Layout>} />
-          <Route path="/wallet" element={<Layout><WalletPage /></Layout>} />            <Route path="/admin" element={<Layout><AdminDashboardPage /></Layout>} />          {/* Note: Video session might not use Layout to take up full screen */}
+          <Route path="/wallet" element={<Layout><WalletPage /></Layout>} />
+          <Route path="/bounties" element={<Layout><BountyBoardPage /></Layout>} />
+          <Route path="/admin" element={<Layout><AdminDashboardPage /></Layout>} />          {/* Note: Video session might not use Layout to take up full screen */}
           <Route path="/session/:sessionId" element={<VideoSessionPage />} />
         </Routes>
       </Router>

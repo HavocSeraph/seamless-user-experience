@@ -18,6 +18,13 @@ export class LivekitService {
       throw new ForbiddenException('You are not authorized to join this room.');
     }
 
+    const now = new Date();
+    const tenMinutesBefore = new Date(session.startTime.getTime() - 10 * 60000);
+    
+    if (now < tenMinutesBefore) {
+      throw new ForbiddenException('Room is not yet open. You can join 10 minutes before start time.');
+    }
+
     const roomName = `session-${sessionId}`;
 
     const at = new AccessToken(

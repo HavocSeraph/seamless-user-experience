@@ -76,22 +76,27 @@ export class LedgerService {
     });
   }
 
-  async releaseEscrow(sessionId: string): Promise<void> {
-    const escrow = await this.prisma.escrow.findUnique({ where: { sessionId } });
+  async releaseEscrow(sessionId: string, providedTx?: any): Promise<void> {
+    const db = providedTx || this.prisma;
+    
+    const escrow = await db.escrow.findUnique({ where: { sessionId } });
     if (!escrow) throw new NotFoundException('Escrow not found');
     if (escrow.status !== EscrowStatus.LOCKED && escrow.status !== EscrowStatus.DISPUTED) {
       throw new BadRequestException('Escrow is not locked or disputed');
     }
 
-    const session = await this.prisma.session.findUnique({ where: { id: sessionId } });
+    const session = await db.session.findUnique({ where: { id: sessionId } });
     if (!session) throw new NotFoundException('Session not found');
 
     const tax = Math.floor(escrow.amount * 0.05);
     const netToMentor = escrow.amount - tax;
-    const adminUser = await this.prisma.user.findFirst({ where: { role: Role.ADMIN } });
+    const adminUser = await db.user.findFirst({ where: { role: Role.ADMIN } });
     if (!adminUser) throw new NotFoundException('System Admin wallet not configured');
 
-    await this.prisma.$transaction(async (tx) => {
+    const execute = async (tx) => {
+      // NOTE: Only if session was not updated already (e.g., from sessions.controller) 
+      // but it's safe to enforce it's COMPLETED here or expect it's updated. 
+      // For atomicity, the caller update and this must be the same TX.
       await tx.user.update({
         where: { id: session.mentorId },
         data: { 
@@ -125,7 +130,13 @@ export class LedgerService {
         where: { sessionId },
         data: { status: EscrowStatus.RELEASED, resolvedAt: new Date() }
       });
-    });
+    };
+
+    if (providedTx) {
+      await execute(providedTx);
+    } else {
+      await this.prisma.$transaction(execute);
+    }
   }
 
   async refundEscrow(sessionId: string): Promise<void> {
@@ -215,12 +226,13 @@ export class LedgerService {
     });
   }
 
-  async freezeEscrow(sessionId: string): Promise<void> {
-    const escrow = await this.prisma.escrow.findUnique({ where: { sessionId } });
+  async freezeEscrow(sessionId: string, providedTx?: any): Promise<void> {
+    const db = providedTx || this.prisma;
+    const escrow = await db.escrow.findUnique({ where: { sessionId } });
     if (!escrow) throw new NotFoundException('Escrow not found');
     if (escrow.status !== EscrowStatus.LOCKED) throw new BadRequestException('Escrow is not locked');
 
-    await this.prisma.escrow.update({
+    await db.escrow.update({
       where: { sessionId },
       data: { status: EscrowStatus.DISPUTED }
     });

@@ -63,47 +63,47 @@ enum DisputeDecision {
 }
 
 model User {
-  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email           String         @unique @db.VarChar(255)
-  passwordHash    String         @db.VarChar(255)
-  name            String         @db.VarChar(255)
-  tokenBalance    Int            @default(50)
-  reputationScore Decimal        @default(0.00) @db.Decimal(3, 2)
-  isVerified      Boolean        @default(false)
-  githubId        String?        @unique @db.VarChar(100)
-  linkedinId      String?        @unique @db.VarChar(100)
-  teachingStreak  Int            @default(0)
-  role            Role           @default(USER)
-  isBanned        Boolean        @default(false)
-  createdAt       DateTime       @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime       @updatedAt @db.Timestamptz(6)
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email           String   @unique @db.VarChar(255)
+  passwordHash    String   @db.VarChar(255)
+  name            String   @db.VarChar(255)
+  tokenBalance    Int      @default(50)
+  reputationScore Decimal  @default(0.00) @db.Decimal(3, 2)
+  isVerified      Boolean  @default(false)
+  githubId        String?  @unique @db.VarChar(100)
+  linkedinId      String?  @unique @db.VarChar(100)
+  teachingStreak  Int      @default(0)
+  role            Role     @default(USER)
+  isBanned        Boolean  @default(false)
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
 
-  skills          Skill[]
-  sessionsAsMentor Session[]     @relation("MentorSessions")
-  sessionsAsStudent Session[]    @relation("StudentSessions")
-  transactionsFrom Transaction[] @relation("TransactionsFrom")
-  transactionsTo   Transaction[] @relation("TransactionsTo")
-  bountiesPosted   Bounty[]      @relation("BountiesPosted")
-  bountyAnswers    BountyAnswer[]
-  reviewsGiven     Review[]      @relation("ReviewsGiven")
-  reviewsReceived  Review[]      @relation("ReviewsReceived")
-  notifications    Notification[]
-  disputesRaised   Dispute[]     @relation("DisputesRaised")
+  skills            Skill[]
+  sessionsAsMentor  Session[]      @relation("MentorSessions")
+  sessionsAsStudent Session[]      @relation("StudentSessions")
+  transactionsFrom  Transaction[]  @relation("TransactionsFrom")
+  transactionsTo    Transaction[]  @relation("TransactionsTo")
+  bountiesPosted    Bounty[]       @relation("BountiesPosted")
+  bountyAnswers     BountyAnswer[]
+  reviewsGiven      Review[]       @relation("ReviewsGiven")
+  reviewsReceived   Review[]       @relation("ReviewsReceived")
+  notifications     Notification[]
+  disputesRaised    Dispute[]      @relation("DisputesRaised")
 }
 
 model Skill {
-  id           String        @id @default(uuid()) @db.Uuid
-  userId       String        @db.Uuid
-  title        String        @db.VarChar(100)
-  description  String        @db.Text
-  category     String        @db.VarChar(50)
-  level        SkillLevel
-  priceCoins   Int
-  isActive     Boolean       @default(true)
-  createdAt    DateTime      @default(now()) @db.Timestamptz(6)
+  id          String     @id @default(uuid()) @db.Uuid
+  userId      String     @db.Uuid
+  title       String     @db.VarChar(100)
+  description String     @db.Text
+  category    String     @db.VarChar(50)
+  level       SkillLevel
+  priceCoins  Int
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now()) @db.Timestamptz(6)
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Restrict)
-  sessions     Session[]
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions Session[]
 }
 
 model Session {
@@ -119,12 +119,12 @@ model Session {
   studentCompleted Boolean       @default(false)
   createdAt        DateTime      @default(now()) @db.Timestamptz(6)
 
-  mentor           User          @relation("MentorSessions", fields: [mentorId], references: [id], onDelete: Restrict)
-  student          User          @relation("StudentSessions", fields: [studentId], references: [id], onDelete: Restrict)
-  skill            Skill         @relation(fields: [skillId], references: [id], onDelete: Restrict)
-  escrow           Escrow?
-  reviews          Review[]
-  dispute          Dispute?
+  mentor  User     @relation("MentorSessions", fields: [mentorId], references: [id], onDelete: Restrict)
+  student User     @relation("StudentSessions", fields: [studentId], references: [id], onDelete: Restrict)
+  skill   Skill    @relation(fields: [skillId], references: [id], onDelete: Restrict)
+  escrow  Escrow?
+  reviews Review[]
+  dispute Dispute?
 
   @@index([mentorId])
   @@index([studentId])
@@ -140,8 +140,8 @@ model Transaction {
   referenceId String?           @db.Uuid
   createdAt   DateTime          @default(now()) @db.Timestamptz(6)
 
-  fromUser    User?             @relation("TransactionsFrom", fields: [fromUserId], references: [id], onDelete: Restrict)
-  toUser      User?             @relation("TransactionsTo", fields: [toUserId], references: [id], onDelete: Restrict)
+  fromUser User? @relation("TransactionsFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User? @relation("TransactionsTo", fields: [toUserId], references: [id], onDelete: Cascade)
 
   @@index([fromUserId])
   @@index([toUserId])
@@ -149,16 +149,16 @@ model Transaction {
 }
 
 model Escrow {
-  id          String       @id @default(uuid()) @db.Uuid
-  sessionId   String?      @unique @db.Uuid
-  bountyId    String?      @unique @db.Uuid
-  amount      Int
-  status      EscrowStatus @default(LOCKED)
-  createdAt   DateTime     @default(now()) @db.Timestamptz(6)
-  resolvedAt  DateTime?    @db.Timestamptz(6)
+  id         String       @id @default(uuid()) @db.Uuid
+  sessionId  String?      @unique @db.Uuid
+  bountyId   String?      @unique @db.Uuid
+  amount     Int
+  status     EscrowStatus @default(LOCKED)
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  resolvedAt DateTime?    @db.Timestamptz(6)
 
-  session     Session?     @relation(fields: [sessionId], references: [id], onDelete: Restrict)
-  bounty      Bounty?      @relation(fields: [bountyId], references: [id], onDelete: Restrict)
+  session Session? @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+  bounty  Bounty?  @relation(fields: [bountyId], references: [id], onDelete: Restrict)
 }
 
 model Bounty {
@@ -172,9 +172,9 @@ model Bounty {
   expiresAt   DateTime     @default(dbgenerated("NOW() + interval '7 days'")) @db.Timestamptz(6)
   createdAt   DateTime     @default(now()) @db.Timestamptz(6)
 
-  poster      User         @relation("BountiesPosted", fields: [posterId], references: [id], onDelete: Restrict)
-  answers     BountyAnswer[]
-  escrow      Escrow?
+  poster  User           @relation("BountiesPosted", fields: [posterId], references: [id], onDelete: Restrict)
+  answers BountyAnswer[]
+  escrow  Escrow?
 }
 
 model BountyAnswer {
@@ -185,22 +185,22 @@ model BountyAnswer {
   isAccepted  Boolean  @default(false)
   createdAt   DateTime @default(now()) @db.Timestamptz(6)
 
-  bounty      Bounty   @relation(fields: [bountyId], references: [id], onDelete: Restrict)
-  responder   User     @relation(fields: [responderId], references: [id], onDelete: Restrict)
+  bounty    Bounty @relation(fields: [bountyId], references: [id], onDelete: Restrict)
+  responder User   @relation(fields: [responderId], references: [id], onDelete: Restrict)
 }
 
 model Review {
-  id          String   @id @default(uuid()) @db.Uuid
-  sessionId   String   @db.Uuid
-  reviewerId  String   @db.Uuid
-  revieweeId  String   @db.Uuid
-  rating      Int
-  comment     String?  @db.Text
-  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  id         String   @id @default(uuid()) @db.Uuid
+  sessionId  String   @db.Uuid
+  reviewerId String   @db.Uuid
+  revieweeId String   @db.Uuid
+  rating     Int
+  comment    String?  @db.Text
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
 
-  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Restrict)
-  reviewer    User     @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Restrict)
-  reviewee    User     @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Restrict)
+  session  Session @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+  reviewer User    @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Restrict)
+  reviewee User    @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Restrict)
 }
 
 model Notification {
@@ -211,20 +211,20 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now()) @db.Timestamptz(6)
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Dispute {
-  id          String           @id @default(uuid()) @db.Uuid
-  sessionId   String           @unique @db.Uuid
-  raisedById  String           @db.Uuid
-  reason      String           @db.Text
-  status      String           @default("OPEN") @db.VarChar(50)
-  adminNotes  String?          @db.Text
-  decision    DisputeDecision?
-  createdAt   DateTime         @default(now()) @db.Timestamptz(6)
-  resolvedAt  DateTime?        @db.Timestamptz(6)
+  id         String           @id @default(uuid()) @db.Uuid
+  sessionId  String           @unique @db.Uuid
+  raisedById String           @db.Uuid
+  reason     String           @db.Text
+  status     String           @default("OPEN") @db.VarChar(50)
+  adminNotes String?          @db.Text
+  decision   DisputeDecision?
+  createdAt  DateTime         @default(now()) @db.Timestamptz(6)
+  resolvedAt DateTime?        @db.Timestamptz(6)
 
-  session     Session          @relation(fields: [sessionId], references: [id], onDelete: Restrict)
-  raisedBy    User             @relation("DisputesRaised", fields: [raisedById], references: [id], onDelete: Restrict)
+  session  Session @relation(fields: [sessionId], references: [id], onDelete: Restrict)
+  raisedBy User    @relation("DisputesRaised", fields: [raisedById], references: [id], onDelete: Restrict)
 }

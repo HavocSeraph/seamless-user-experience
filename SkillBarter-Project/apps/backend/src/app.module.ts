@@ -13,6 +13,11 @@ import { LoggerModule } from 'nestjs-pino';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { BountiesModule } from './bounties/bounties.module';
+import { StorageModule } from './storage/storage.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { NotificationsModule } from './notifications/notifications.module';
+import { PresenceModule } from './presence/presence.module';
 
 @Module({
   imports: [
@@ -24,6 +29,7 @@ import { AppService } from './app.service';
       }
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 1000 }]),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     LedgerModule,
@@ -32,7 +38,11 @@ import { AppService } from './app.service';
     SessionsModule,
     LivekitModule,
     AdminModule,
-    HealthModule
+    HealthModule,
+    BountiesModule,
+    StorageModule,
+    NotificationsModule,
+    PresenceModule
   ],
   controllers: [AppController],
   providers: [

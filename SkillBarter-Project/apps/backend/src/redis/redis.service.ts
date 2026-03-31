@@ -4,20 +4,29 @@ import Redis from 'ioredis';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
+  public readonly pubClient: Redis;
+  public readonly subClient: Redis;
   public readonly client: Redis;
 
   constructor(private configService: ConfigService) {
-    this.client = new Redis(this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379');
+    const url = this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
+    this.pubClient = new Redis(url);
+    this.subClient = new Redis(url);
+    this.client = this.pubClient;
   }
 
   onModuleInit() {
-    this.client.on('error', (err) => {
-      console.error('Redis error', err);
+    this.pubClient.on('error', (err) => {
+      console.error('Redis pub error', err);
+    });
+    this.subClient.on('error', (err) => {
+      console.error('Redis sub error', err);
     });
   }
 
   onModuleDestroy() {
-    this.client.disconnect();
+    this.pubClient.disconnect();
+    this.subClient.disconnect();
   }
 }
 

@@ -113,4 +113,75 @@ export class SessionsController {
       }
     });
   }
+
+  @Patch(':id/complete')
+  @UseGuards(AuthGuard('jwt'))
+  async completeSession(@Param('id') id: string, @Request() req) {
+    const userId = req.user.id;
+
+    const session = await this.prisma.session.findUnique({ where: { id } });
+    if (!session) throw new BadRequestException('Session not found');
+
+    if (session.status === 'COMPLETED') throw new BadRequestException('Already completed');
+    if (session.status === 'DISPUTED') throw new BadRequestException('Cannot complete disputed session');
+
+    let dataToUpdate: any = {};
+    if (session.mentorId === userId) dataToUpdate.mentorCompleted = true;
+    else if (session.studentId === userId) dataToUpdate.studentCompleted = true;
+    else throw new BadRequestException('Unauthorized');
+
+    const updated = await this.prisma.session.update({
+      where: { id },
+      data: dataToUpdate
+    });
+
+    if (updated.mentorCompleted && updated.studentCompleted) {
+      // Both parties completed! 
+      await this.prisma.$transaction(async (tx) => {
+        await tx.session.update({
+          where: { id },
+          data: { status: 'COMPLETED' }
+        });
+        
+        // Use LedgerService logic explicitly or rewrite atomicity
+        await this.ledger.releaseEscrow(id, tx);
+      });
+    }
+
+    return await this.prisma.session.findUnique({ where: { id } });
+  }
+
+  @Patch(':id/dispute')
+  @UseGuards(AuthGuard('jwt'))
+  async raiseDispute(@Param('id') id: string, @Request() req, @Body() body: any) {
+    const userId = req.user.id;
+    const { reason } = body;
+
+    const session = await this.prisma.session.findUnique({ where: { id } });
+    if (!session) throw new BadRequestException('Session not found');
+
+    if (session.studentId !== userId && session.mentorId !== userId) {
+      throw new BadRequestException('Unauthorized');
+    }
+
+    if (session.status === 'COMPLETED') throw new BadRequestException('Cannot dispute completed session');
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.session.update({
+        where: { id },
+        data: { status: 'DISPUTED' }
+      });
+      await this.ledger.freezeEscrow(id, tx);
+
+      await tx.dispute.create({
+        data: {
+          sessionId: id,
+          raisedById: userId,
+          reason: reason || 'No reason provided',
+        }
+      });
+    });
+
+    return await this.prisma.session.findUnique({ where: { id } });
+  }
 }
