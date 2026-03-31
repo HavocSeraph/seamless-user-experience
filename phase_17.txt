@@ -1,0 +1,32 @@
+Phase 4 — Live Classroom (WebRTC + Monaco + Excalidraw) 
+TABLE 9 — PHASE 4 MODEL CONFIGURATION 
+Attribute Value 
+Recommended Model Claude Opus 4.5 with Extended Thinking 
+Reasoning Session state machine + escrow release + dispute flow 
+from classroom involves complex multi-step financial 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    14 
+logic. 
+Extended Thinking REQUIRED — trace the full completion flow step by 
+step. 
+ 
+Files to Load 
+• apps/backend/src/sessions/sessions.service.ts (joinRoom, completeSession, raiseDispute 
+methods) 
+• apps/backend/src/livekit/livekit.service.ts 
+• apps/backend/src/livekit/livekit.controller.ts 
+• apps/backend/src/disputes/disputes.service.ts 
+• apps/frontend/src/pages/classroom/ClassroomPage.tsx 
+• apps/frontend/src/components/classroom/VideoGrid.tsx 
+• apps/frontend/src/components/classroom/CodeEditor.tsx (Monaco) 
+• apps/frontend/src/components/classroom/Whiteboard.tsx (Excalidraw) 
+• apps/frontend/src/components/classroom/CountdownTimer.tsx 
+• apps/frontend/src/components/classroom/RatingModal.tsx 
+• apps/frontend/src/hooks/useLiveKit.ts 
+Beast Mode Instruction 
+"You are a senior WebRTC engineer auditing the SkillBarter live classroom system. Enable extended 
+thinking. For the session completion flow, trace every step: 1. Both users click 'Complete'. 2. Session 
+status transitions. 3. Escrow release with tax. 4. teachingStreak increment. 5. Rating modal appearance. 
+All 5 steps must happen atomically or with correct error handling. For every bug: assign severity and 
+provide corrected code inline." 
+Testing Prompt —

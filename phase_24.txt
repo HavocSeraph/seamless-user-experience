@@ -1,0 +1,61 @@
+Phase 7 Test Scenarios 
+1. Admin Route Security (EVERY Route Must Be Checked) 
+• Verify: EVERY route in admin.controller.ts has @Roles('ADMIN') 
+• Verify: EVERY route in admin.controller.ts has @UseGuards(JwtAuthGuard, RolesGuard) 
+• Verify: EVERY route in disputes.controller.ts has @Roles('ADMIN') + @UseGuards(...) 
+• Attempt: Access GET /admin/users without JWT → must return 401 
+• Attempt: Access GET /admin/users with regular user JWT → must return 403 
+• Attempt: Access GET /admin/users with admin JWT → must return 200 
+• RED FLAG: Any admin route missing either guard = CRITICAL security vulnerability 
+2. Dispute Resolution — SPLIT Math Verification 
+TABLE 15 — SPLIT DISPUTE RESOLUTION MATH (TOKEN CONSERVATION MUST HOLD) 
+escrowAmount tax (Math.floor × 
+0.05) remaining mentorReceives 
+(floor/2) studentReceives Conservation 
+Check 
+100 5 95 47 48 47+48+5 = 100 
+✓ 
+101 5 96 48 48 48+48+5 = 101 
+✓ 
+99 4 95 47 48 47+48+4 = 99 
+✓ 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    22 
+50 2 48 24 24 24+24+2 = 50 
+✓ 
+1 0 1 0 1 0+1+0 = 1 ✓ 
+ 
+• Verify: SPLIT math is documented in code comments (half, tax, mentorReceives, 
+studentReceives) 
+• Verify: All balance updates in single prisma.$transaction() 
+• Verify: resolvedAt set on escrow after SPLIT resolution 
+• Verify: Transaction records created for: mentor credit, student credit, tax to admin 
+3. User Ban — Atomic Transaction 
+• Simulate: Admin bans user X who has 2 pending sessions and 1 locked escrow 
+• Verify ALL of the following happen in SINGLE prisma.$transaction(): 
+• User.status → BANNED 
+• All PENDING sessions where user is mentor → CANCELLED 
+• All PENDING sessions where user is student → CANCELLED 
+• All LOCKED escrows for cancelled sessions → REFUNDED to respective students 
+• Transaction records created for each refund 
+• Verify: Cannot ban another ADMIN (role check returns 403) 
+• Verify: Banned user cannot log in (auth check on login) 
+• Verify: Banned user's active WebSocket connections are terminated 
+4. Redis SCAN vs KEYS 
+• CRITICAL: Search codebase for redis.keys('*') or client.keys('*') 
+• Verify: All Redis key enumeration uses SCAN with cursor (not KEYS) 
+• Reason: KEYS blocks the Redis event loop — in production with thousands of keys, this causes 
+latency spikes and can freeze the entire Redis instance 
+Critical Rules Checklist — Phase 7 
+79. EVERY admin route has @Roles('ADMIN') + @UseGuards(JwtAuthGuard, RolesGuard) 
+80. SPLIT math: mentorReceives + studentReceives + tax = escrowAmount (documented in 
+comments) 
+81. Ban cancels ALL pending sessions and refunds escrows in same transaction 
+82. adminNotes minimum 20 characters enforced (DTO + frontend) 
+83. Cannot ban another ADMIN (role check) 
+84. All admin actions auditable via Transaction table 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    23 
+85. Redis SCAN used (not KEYS) for daily active users 
+86. Admin dashboard charts render correctly 
+87. DisputeDetailModal confirm button disabled until notes >= 20 chars

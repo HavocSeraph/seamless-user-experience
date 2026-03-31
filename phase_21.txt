@@ -1,0 +1,29 @@
+Phase 6 — Notifications + WebSocket + Online Presence 
+TABLE 12 — PHASE 6 MODEL CONFIGURATION 
+Attribute Value 
+Recommended Model Claude Sonnet 4.5 
+Reasoning 
+WebSocket/Redis pub-sub patterns are well-defined. 
+Fast iteration needed for connection handling, 
+notification persistence, and presence TTL. 
+Extended Thinking Not required. 
+ 
+Files to Load 
+• apps/backend/src/notifications/notifications.gateway.ts 
+• apps/backend/src/notifications/notifications.service.ts 
+• apps/backend/src/notifications/notifications.controller.ts 
+• apps/backend/src/presence/presence.service.ts 
+• apps/backend/src/redis/redis.module.ts 
+• apps/frontend/src/hooks/useNotifications.ts 
+• apps/frontend/src/hooks/usePresence.ts 
+• apps/frontend/src/components/layout/NotificationBell.tsx 
+• apps/frontend/src/components/ui/OnlinePresenceDot.tsx 
+• apps/frontend/src/lib/socket.ts 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    19 
+Beast Mode Instruction 
+"You are a senior distributed systems engineer auditing the SkillBarter real-time system. Key focus: 
+TWO separate Redis clients (pub and sub must be separate ioredis instances — sharing one causes 
+deadlock), notification persistence before WebSocket emit, and JWT validation in handleConnection. 
+For every bug: assign severity and provide corrected code inline." 
+Testing Prompt —

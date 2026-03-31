@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../lib/axios';
 
 interface Dispute {
   id: string;
@@ -26,22 +27,8 @@ export function AdminDashboardPage() {
 
   const fetchDisputes = async () => {
     try {
-      const storedToken = localStorage.getItem('token');
-      if (!storedToken) {
-        navigate('/auth');
-        return;
-      }
-
-      const res = await fetch('http://localhost:3000/admin/disputes', {
-        headers: {
-          Authorization: `Bearer ${storedToken}`,
-        },
-      });
-
-      if (!res.ok) throw new Error('Failed to fetch disputes');
-
-      const data = await res.json();
-      setDisputes(data);
+      const res = await api.get('/admin/disputes');
+      setDisputes(res.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -53,18 +40,7 @@ export function AdminDashboardPage() {
     if (!window.confirm(`Are you sure you want to ${decision}?`)) return;
 
     try {
-      const storedToken = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:3000/admin/disputes/${id}/resolve`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${storedToken}`,
-        },
-        body: JSON.stringify({ decision }),
-      });
-
-      if (!res.ok) throw new Error('Failed to resolve dispute');
-
+      await api.post(`/admin/disputes/${id}/resolve`, { decision });
       // Refresh list
       fetchDisputes();
       alert('Dispute resolved successfully!');

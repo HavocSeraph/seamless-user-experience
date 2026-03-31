@@ -1,0 +1,538 @@
+Phase 8 Test Scenarios 
+1. Environment Variables (All 17 Required) 
+TABLE 17 — REQUIRED ENVIRONMENT VARIABLES REFERENCE 
+# Variable Required Notes 
+1 DATABASE_URL Yes PostgreSQL connection 
+string 
+2 REDIS_URL Yes Redis connection string 
+with password 
+3 JWT_ACCESS_SECRET Yes Min 32 chars — signs 15-
+minute access tokens 
+4 JWT_REFRESH_SECRET Yes Min 32 chars — signs 7-
+day refresh tokens 
+5 JWT_ACCESS_EXPIRY Yes Must be '15m' 
+6 JWT_REFRESH_EXPIRY Yes Must be '7d' 
+7 GITHUB_CLIENT_ID Yes GitHub OAuth App client 
+ID 
+8 GITHUB_CLIENT_SECRET Yes GitHub OAuth App client 
+secret 
+9 GITHUB_CALLBACK_URL Yes 
+Must match GitHub 
+OAuth App settings 
+exactly 
+10 LINKEDIN_CLIENT_ID Yes LinkedIn OAuth App 
+client ID 
+11 LINKEDIN_CLIENT_SECRET Yes LinkedIn OAuth App 
+client secret 
+12 LINKEDIN_CALLBACK_URL Yes 
+Must match LinkedIn 
+OAuth App settings 
+exactly 
+13 LIVEKIT_API_KEY Yes LiveKit project API key 
+14 LIVEKIT_API_SECRET Yes LiveKit project API secret 
+15 LIVEKIT_URL Yes LiveKit server URL 
+(wss://...) 
+16 CLOUDINARY_URL Yes (or S3 vars) Cloudinary connection 
+string 
+17 ADMIN_WALLET_USER_ID Yes Admin wallet DB user ID 
+— never hardcode 
+ 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    25 
+2. Nginx WebSocket Configuration 
+• Verify: WebSocket proxy configured with proxy_http_version 1.1 
+• Verify: proxy_set_header Upgrade $http_upgrade present 
+• Verify: proxy_set_header Connection 'upgrade' present 
+• Verify: proxy_read_timeout 86400 (24 hours — CRITICAL for WebSocket) 
+• RED FLAG: Without proxy_read_timeout 86400, Nginx kills WebSocket connections after 60 
+seconds 
+• Verify: SSL/TLS configured (HTTPS in production) 
+• Verify: HTTP → HTTPS redirect configured 
+• Verify: Gzip compression enabled 
+3. GitHub Actions CI/CD Pipeline 
+• Verify: Pipeline order: lint → test → build → push → deploy 
+• Verify: Deploy job only runs after build job succeeds (needs: build-and-push) 
+• Verify: Health check passes before deploy job completes 
+• Verify: Docker image tagged with git SHA (not just 'latest') 
+• Verify: Secrets (JWT_SECRET, etc.) stored in GitHub Secrets (not in YAML) 
+• Verify: No sensitive values hardcoded in workflow YAML 
+4. Rate Limiting 
+• Verify: Auth endpoints rate limited to 5 requests per minute per IP 
+• Verify: Rate limiter applied to: POST /auth/login, POST /auth/register, POST /auth/refresh 
+• Verify: Rate limit exceeded returns 429 Too Many Requests 
+• Simulate: 6 rapid requests to POST /auth/login → 6th must return 429 
+Critical Rules Checklist — Phase 8 
+88. Multi-stage Dockerfiles (not single-stage — single-stage images are too large) 
+89. CMD runs 'prisma migrate deploy' before app start (never skip migrations) 
+90. .env not committed (.gitignore check — verify .env is listed) 
+91. Redis maxmemory-policy = allkeys-lru (prevents out-of-memory crashes) 
+92. Pino redacts authorization headers and cookies (never log tokens) 
+93. Auth endpoints rate limited to 5/min (brute force protection) 
+94. Health check passes before deploy job runs 
+95. Nginx WebSocket proxy_read_timeout = 86400 
+96. All 17 required env vars present and validated on startup 
+97. GitHub Actions pipeline order: lint → test → build → push → deploy 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    26 
+98. docker-compose has all 5 services: postgres, redis, backend, frontend, nginx 
+  
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    27 
+Section 3 — The Mega End-to-End Prompt 
+TABLE 18 — MEGA E2E PROMPT CONFIGURATION 
+Attribute Value 
+Primary Model Gemini 2.5 Pro 
+Alternative Model Claude Opus 4.5 with Extended Thinking 
+Files to Load ENTIRE CODEBASE — all files from all 8 phases 
+simultaneously 
+Extended Thinking REQUIRED for Claude Opus 4.5 alternative 
+ 
+Beast Mode Instruction 
+"You are a senior full-stack engineer performing a complete production readiness audit of SkillBarter. 
+Load the entire codebase. Simulate the complete user journey from registration to dispute resolution. 
+For every bug found: 1. Assign severity: CRITICAL / HIGH / MEDIUM / LOW. 2. Fix it inline with corrected 
+code. 3. Verify token conservation (no tokens created or destroyed outside of defined rules). Enable 
+extended thinking. This is a comprehensive audit — do not skip any step." 
+Part 1 — The Golden Path Simulation (15 Steps) 
+Execute each step in sequence. For each step, verify the expected outcome. Report any deviation 
+as a bug with severity and inline fix. 
+TABLE 19 — GOLDEN PATH SIMULATION: 15-STEP SEQUENCE 
+Step Action Key Verifications BUG CHECK 
+1 
+POST /auth/register { 
+email: alice@test.com, 
+password, name } 
+Response has user object 
+(no passwordHash), 
+access token in body, 
+httpOnly refresh cookie, 
+DB: token_balance=50, 
+Transaction EARN record 
+created 
+localStorage.getItem('token') 
+must return null 
+2 Alice connects GitHub 
+OAuth (first time) 
++50 coins credited 
+(balance=100), 
+Transaction EARN record 
+created 
+alice.token_balance must be 
+exactly 100 
+3 Alice connects GitHub 
+OAuth (second time) 
+0 additional coins 
+(idempotent) 
+alice.token_balance must 
+still be exactly 100 
+4 Alice connects LinkedIn 
+OAuth (first time) 
++50 coins credited 
+(balance=150) 
+alice.token_balance must be 
+exactly 150 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    28 
+5 
+Bob registers + lists 
+'Advanced TypeScript' 
+skill at 30 coins 
+Skill appears in FTS 
+search for 'typescript', 
+GIN index used 
+Search uses plainto_tsquery 
+not LIKE 
+6 
+Alice books Bob's 
+session (30 coins, 1 
+hour from now) 
+ATOMIC: escrow locked 
++ session created in 
+single transaction, Alice 
+balance=120, Bob 
+notified via WebSocket 
+If escrow lock succeeds but 
+session.create fails, Alice's 
+30 coins must be rolled back 
+7 Both join classroom 10 
+min before start 
+LiveKit tokens generated, 
+session status → ACTIVE 
+when both join, 
+countdown timer synced 
+Token generation is time-
+gated on backend 
+8 Bob clicks 'Mark 
+Complete' 
+mentor_completed=true, 
+escrow still LOCKED, 
+student notified 
+Session status must NOT 
+change to COMPLETED yet 
+9 Alice clicks 'Mark 
+Complete' 
+ATOMIC: 
+session→COMPLETED, 
+escrow→RELEASED, 
+tax=1 to admin, 
+Bob+=29, 
+Bob.teachingStreak++, 
+resolvedAt set 
+Total tokens unchanged: 30 
+= 29 (Bob) + 1 (admin) 
+10 Alice submits 5-star 
+rating 
+bob.reputation_score 
+updated (rolling 
+average), cannot rate 
+same session twice 
+Rating modal appeared after 
+completion, not before 
+11 
+Alice creates bounty 
+'Redis pub/sub?' 
+reward=20 coins 
+ATOMIC: escrow locked 
++ bounty created, Alice 
+balance=100 
+Alice balance must be 
+exactly 100 
+12 
+Bob uploads video 
+answer via presigned 
+URL 
+File goes DIRECTLY to 
+S3/Cloudinary, Bob 
+sends only videoUrl to 
+NestJS 
+No @UploadedFile() on 
+answer endpoint 
+13 Alice accepts Bob's 
+answer 
+ATOMIC: 
+escrow→RELEASED, 
+tax=1 to admin, 
+Bob+=19, 
+bounty→CLOSED 
+Bob balance: 50+29+19=98 
+14 
+Carol books Dave (50 
+coins), Carol raises 
+dispute 
+Dispute created, 
+escrow→DISPUTED, 
+resolvedAt NOT set, 
+admin notified 
+Session cannot be 
+completed while disputed 
+15 
+Admin resolves dispute 
+with SPLIT, adminNotes 
+>= 20 chars 
+ATOMIC: tax=2, 
+Carol+=24, Dave+=24, 
+escrow→RELEASED, 
+resolvedAt set 
+24+24+2=50 — token 
+conservation verified 
+ 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    29 
+Part 2 — Security Audit 
+2.1 Authentication Bypass Attempts 
+• Attempt: GET /sessions without JWT → must return 401 
+• Attempt: GET /admin/users without JWT → must return 401 
+• Attempt: GET /admin/users with regular user JWT → must return 403 
+• Attempt: POST /sessions with manipulated JWT (changed userId) → must return 401 
+2.2 Data Exposure 
+• Attempt: GET /users/:id → verify passwordHash NOT in response 
+• Attempt: GET /skills → verify no user.passwordHash in nested user objects 
+• Attempt: GET /sessions → verify no passwordHash in mentor/student objects 
+2.3 Token Overdraft & SQL Injection 
+• Attempt: Book session costing 200 coins with balance of 50 → must return 400 
+InsufficientFunds 
+• Attempt: Create bounty for 200 coins with balance of 50 → must return 400 InsufficientFunds 
+• Verify: token_balance CHECK constraint prevents negative values at DB level 
+• Attempt: Search with payload: "'; DROP TABLE skills; --" → sanitized, no error 
+• Attempt: Search with payload: "' OR '1'='1" → sanitized, no error 
+• Verify: Prisma parameterized queries prevent injection (no raw SQL with string interpolation) 
+Part 3 — Token Conservation Audit 
+Token Conservation Law: sum(all user balances) + sum(all LOCKED escrows) + sum(all TAX transactions) 
+= sum(all EARN transactions). Any discrepancy indicates a bug in LedgerService. 
+TABLE 20 — EXPECTED TOKEN STATE AFTER GOLDEN PATH SIMULATION 
+User Starting Balance Transactions Expected Final Balance 
+Alice 
+50 (signup) + 50 
+(GitHub) + 50 (LinkedIn) 
+= 150 
+−30 (session booking) − 
+20 (bounty creation) 100 coins 
+Bob 50 (signup) 
++29 (session completion) 
++ 19 (bounty 
+acceptance) 
+98 coins 
+Admin Wallet 0 
++1 (session tax) + 1 
+(bounty tax) + 2 (dispute 
+tax) 
+4 coins 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    30 
+Carol 50 (signup) −50 (session booking) + 
+24 (dispute split) 24 coins 
+Dave 50 (signup) +24 (dispute split) 74 coins 
+ 
+Part 4 — Production Readiness Check 
+• Verify: GET /health returns 200 { status: 'ok', db: 'connected', redis: 'connected' } 
+• Verify: All 17 env vars present and validated (app throws on startup if missing) 
+• Verify: Pino NOT logging JWT tokens or passwords 
+• Verify: 6th auth request in 1 minute returns 429 Too Many Requests 
+• Verify: Nginx WebSocket proxy_read_timeout = 86400 
+• Verify: No TypeScript 'any' types in financial code (LedgerService, WalletService) 
+• Verify: All Prisma transactions atomic (no sequential awaits in financial operations) 
+Deliverable Format 
+The AI model should produce a structured report with the following sections: 
+99. Executive Summary: Total bugs found (CRITICAL/HIGH/MEDIUM/LOW counts), Token 
+Conservation PASS/FAIL, Security Audit PASS/FAIL, Production Readiness PASS/FAIL 
+100. Bug Report Table sorted by severity: # | Severity | Phase | File | Description | Fix 
+101. Corrected Code for every CRITICAL and HIGH bug (inline, not described) 
+102. Token Conservation Proof: total_issued = current_balances + locked_escrows + burned_tax 
+103. Race Condition Analysis: concurrent booking, concurrent escrow release 
+104. TypeScript Type Safety Report: any 'any' types found in financial code 
+  
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    31 
+Section 4 — UX Quality Gates Checklist 
+Review all frontend pages and components against the following quality gates. For each item: verify 
+PASS or FAIL. For every FAIL: provide the corrected component code inline. 
+4.1 Loading States 
+TABLE 21 — LOADING STATE QUALITY GATES 
+Component Expected Loading State Pass/Fail 
+MarketplacePage Shadcn Skeleton cards while 
+fetching skills [ ] 
+WalletPage — BalanceCard Skeleton placeholder matching 
+card dimensions [ ] 
+SessionsListPage Skeleton rows in session list [ ] 
+BountyBoardPage Skeleton bounty cards [ ] 
+AdminDashboardPage Skeleton stats cards + chart 
+placeholders [ ] 
+All async operations No blank screens — always show 
+Skeleton [ ] 
+ 
+4.2 Error Boundaries 
+• Error boundary wraps all page-level components 
+• Error boundary shows user-friendly message (not raw error or stack trace) 
+• Error boundary has 'Try Again' button that resets the boundary 
+• Error boundary does NOT expose stack traces in production (NODE_ENV check) 
+4.3 Toast Notifications 
+TABLE 22 — TOAST NOTIFICATION QUALITY GATES 
+Action Expected Toast Variant 
+Successful booking 'Session booked successfully!' success 
+Failed booking (insufficient 
+balance) 
+'Insufficient balance. You need X 
+more coins.' error 
+Successful bounty creation 'Bounty posted! Reward locked in 
+escrow.' success 
+Dispute raised 'Dispute raised. Admin has been info 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    32 
+notified.' 
+Session completed 'Session completed! Tokens 
+released to mentor.' success 
+Any API error Specific error message from API 
+response error 
+Silent failure (no toast) FAIL — all errors must surface to 
+user CRITICAL 
+ 
+4.4 Mobile Responsiveness (375px Width) 
+• Marketplace page: skill cards stack vertically (1 column on mobile) 
+• Wallet page: summary cards stack vertically 
+• Classroom page: video only on mobile (editor/whiteboard hidden or tabbed) 
+• Admin panel: tables scroll horizontally (not clipped) 
+• Navigation menu: collapses to hamburger on mobile 
+4.5 Empty States 
+TABLE 23 — EMPTY STATE QUALITY GATES 
+Page/Component Expected Empty State Message CTA Button? 
+MarketplacePage (no skills) 'No skills found. Be the first to list 
+a skill!' Yes — 'List a Skill' 
+SessionsListPage (no sessions) 
+'No sessions yet. Browse the 
+marketplace to book your first 
+session!' 
+Yes — 'Browse Marketplace' 
+NotificationsPage (no 
+notifications) 
+'You're all caught up! No new 
+notifications.' No 
+BountyBoardPage (no bounties) 'No bounties posted yet. Post a 
+question to get started!' Yes — 'Post Bounty' 
+WalletPage (no transactions) 'No transactions yet. Your token 
+history will appear here.' No 
+ 
+4.6 Disabled States 
+• BookingModal 'Book Now' disabled when balance < price (with tooltip: 'You need X more 
+coins') 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    33 
+• DisputeDetailModal confirm button disabled until adminNotes.length >= 20 (with character 
+count shown) 
+• 'Join Room' button disabled > 10 min before session start (with countdown to unlock) 
+• All submit buttons disabled during API calls (prevent double-submit) 
+• Rating submit disabled until star rating selected (1–5) 
+4.7 Accessibility 
+• All interactive elements have aria-label or aria-labelledby 
+• Focus management: modal opens → focus trapped inside → modal closes → focus returns to 
+trigger element 
+• Keyboard navigation works for all modals (Escape to close, Tab to navigate) 
+• Color contrast meets WCAG AA (4.5:1 for normal text, 3:1 for large text) 
+• Images have descriptive alt text (not empty alt='') 
+4.8 Visual Quality 
+TABLE 24 — VISUAL QUALITY GATES 
+Element Expected Behavior Pass/Fail 
+WalletPage BalanceCard Animated count-up on mount 
+(framer-motion) [ ] 
+Transaction badges 
+EARN=green, SPEND=red, 
+ESCROW_LOCK=amber, 
+ESCROW_RELEASE=green, 
+TAX=gray, REFUND=blue 
+[ ] 
+Online presence dot Green = online, gray = offline (no 
+yellow or other colors) [ ] 
+Notification badge Red dot with unread count, 
+hidden when count = 0 [ ] 
+Skeleton dimensions Skeleton matches final content 
+dimensions (no layout shift) [ ] 
+Optimistic updates 
+Mark notification read → 
+immediate UI update (not waiting 
+for API) 
+[ ] 
+ 
+  
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    34 
+Section 5 — Token Conservation Audit SQL Queries 
+Run these queries directly against the PostgreSQL database to verify token conservation, detect 
+anomalies, and audit the financial integrity of the SkillBarter platform. All queries should be run in a 
+read-only transaction to prevent accidental modifications. 
+Run these queries after every major deployment and after any dispute resolution. A non -zero 
+discrepancy in Query 2 indicates a critical bug in LedgerService that must be investigated immediately.  
+Query 1 — Current State Summary 
+Provides a high-level snapshot of all token flows: user balances, locked escrows, tax burned, and 
+bonuses issued. Use this as the first diagnostic query. 
+TABLE 25 — QUERY 1: CURRENT STATE SUMMARY METRICS 
+Metric SQL Clause Expected Behavior 
+Total User Balances SUM(token_balance) WHERE 
+status != 'BANNED' Sum of all active user balances 
+Locked Escrow Amounts COALESCE(SUM(amount), 0) 
+WHERE status = 'LOCKED' Tokens currently in escrow 
+Total Tax Burned (to Admin) COALESCE(SUM(amount), 0) 
+WHERE type = 'TAX' Cumulative tax collected 
+Total Signup Bonuses Issued 
+SUM(amount) WHERE type = 
+'EARN' AND description LIKE 
+'%signup%' 
+Total signup bonuses 
+Total OAuth Bonuses Issued 
+SUM(amount) WHERE type = 
+'EARN' AND description LIKE 
+'%OAuth%' 
+Total OAuth bonuses 
+ 
+Query 2 — Token Conservation Formula 
+The master conservation check. The discrepancy column MUST be 0. Any non-zero value indicates 
+tokens were created or destroyed outside of defined rules — a critical financial bug. 
+Conservation Law: total_issued = current_balances + locked_escrows + burned_tax. If discrepancy != 0, 
+check LedgerService for non-atomic operations (sequential awaits instead of prisma.$transaction()).  
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    35 
+Query 3 — Detect Negative Balances 
+Should return 0 rows in a healthy system. Any row returned indicates the application-level balance 
+check failed AND the DB CHECK constraint was bypassed — a critical double failure. 
+TABLE 26 — QUERY 3: NEGATIVE BALANCE DETECTION 
+Query Expected Result If Non-Zero 
+SELECT id, email, token_balance 
+FROM users WHERE 
+token_balance < 0 
+0 rows CRITICAL: Application-level check 
+AND DB constraint both failed 
+SELECT id, email, token_balance 
+FROM users WHERE 
+token_balance IS NULL 
+0 rows HIGH: token_balance has no 
+default or was set to NULL 
+SELECT COUNT(*) FROM escrows 
+WHERE status = 'LOCKED' AND 
+amount <= 0 
+0 rows HIGH: Escrow created with invalid 
+amount 
+ 
+Query 4 — Orphaned Escrows 
+Detects LOCKED escrows that have no associated session or bounty. These represent tokens that 
+are permanently locked with no way to release them — a critical data integrity issue. 
+Query 5 — Escrow State Machine Violations 
+Detects escrows that violate the one-way state machine: LOCKED escrows with resolvedAt set 
+(should never happen), or RELEASED/REFUNDED escrows without resolvedAt (should always be 
+set). 
+TABLE 27 — QUERY 5: ESCROW STATE MACHINE VIOLATION TYPES 
+Violation Type Detection Condition Root Cause 
+LOCKED with resolvedAt set status = 'LOCKED' AND 
+resolved_at IS NOT NULL 
+freezeEscrow incorrectly set 
+resolvedAt 
+RELEASED without resolvedAt status = 'RELEASED' AND 
+resolved_at IS NULL 
+releaseEscrow did not set 
+resolvedAt 
+REFUNDED without resolvedAt status = 'REFUNDED' AND 
+resolved_at IS NULL 
+refundEscrow did not set 
+resolvedAt 
+DISPUTED with resolvedAt set status = 'DISPUTED' AND 
+resolved_at IS NOT NULL 
+freezeEscrow incorrectly set 
+resolvedAt 
+ 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    36 
+Query 6 — Duplicate OAuth Bonuses (Idempotency Check) 
+Detects users who received the same OAuth bonus more than once — indicating the idempotency 
+check in the OAuth strategy failed. Should return 0 rows. 
+Query 7 — Admin Wallet Integrity 
+Verifies the admin wallet is receiving all tax revenue correctly. The TAX transaction count should 
+match the total number of completed sessions and accepted bounties. 
+Query 8 — Daily Token Velocity (Anomaly Detection) 
+Tracks token flow by day and transaction type over the last 30 days. Use this to detect anomalies: 
+sudden spikes in EARN transactions (bonus exploit), unusual ESCROW_LOCK patterns (booking 
+fraud), or TAX amounts inconsistent with session volume. 
+TABLE 28 — QUERY 8: TOKEN VELOCITY ANOMALY PATTERNS 
+Anomaly Pattern What It Indicates Severity 
+EARN transactions >> expected 
+signup/OAuth volume 
+Bonus exploit — idempotency 
+check bypassed CRITICAL 
+ESCROW_LOCK without matching 
+ESCROW_RELEASE or REFUND 
+Orphaned escrows — tokens 
+permanently locked HIGH 
+TAX amount inconsistent with 
+session count 
+Tax calculation bug in 
+LedgerService HIGH 
+PENALTY transactions with 
+amount > 10 
+No-show penalty cap not 
+enforced MEDIUM 
+BOUNTY transactions without 
+matching ESCROW_LOCK 
+Bounty reward paid without 
+escrow CRITICAL 
+ 
+ 
+ 
+SkillBarter Beast Mode Testing Prompt Suite — Department of Computer Engineering, University of 
+Mumbai, Academic Year 2025–2026. Submitted by Adit Halde (337), Kartik Hulmukh (338), Vivek 
+Humbe (339). Supervised by Prof. Kaajal Sharma.

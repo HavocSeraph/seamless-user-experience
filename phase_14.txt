@@ -1,0 +1,91 @@
+Phase 2 Test Scenarios 
+1. LedgerService Unit Tests (All 7 Must Pass) 
+TABLE 4 — LEDGERSERVICE UNIT TEST MATRIX 
+Test # Method Assertion 
+1 credit() Balance increases + Transaction 
+record created with type=EARN 
+2 debit() — success Balance decreases + Transaction 
+record created with type=SPEND 
+3 debit() — insufficient funds Throws BadRequestException 
+when balance < amount 
+4 lockEscrow() 
+Escrow created with 
+status=LOCKED, user balance 
+decremented atomically 
+5 releaseEscrow() 
+Escrow → RELEASED, mentor 
+credited, 5% tax to admin, 
+teachingStreak++ 
+6 refundEscrow() Escrow → REFUNDED, student 
+balance restored in full 
+7 applyNoShowPenalty() 
+Penalty = Math.min(10, 
+mentorBalance) — never goes 
+below 0 
+ 
+2. Atomicity Verification 
+• Verify: lockEscrow uses prisma.$transaction() — NOT sequential await calls 
+• Verify: releaseEscrow uses prisma.$transaction() — NOT sequential await calls 
+• Verify: refundEscrow uses prisma.$transaction() — NOT sequential await calls 
+• Verify: splitEscrow uses prisma.$transaction() — NOT sequential await calls 
+• Verify: creditUser signup bonus uses prisma.$transaction() — NOT sequential await calls 
+• RED FLAG: Search for any pattern like: await prisma.user.update(...balance); await 
+prisma.transaction.create(...) — this is NOT atomic and must be fixed immediately 
+3. Tax Math Verification 
+TABLE 5 — TAX MATH TEST CASES (ALWAYS MATH.FLOOR, NEVER MATH.ROUND) 
+Input Amount Expected Tax (Math.floor) Mentor Receives Verification 
+100 coins Math.floor(5.00) = 5 95 coins PASS 
+101 coins Math.floor(5.05) = 5 96 coins PASS 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    10 
+99 coins Math.floor(4.95) = 4 95 coins PASS 
+1 coin Math.floor(0.05) = 0 1 coin PASS — no tax on tiny 
+amounts 
+19 coins Math.floor(0.95) = 0 19 coins PASS — floor prevents 
+over-taxation 
+ 
+4. Escrow State Machine 
+TABLE 6 — ESCROW STATE MACHINE TRANSITION MATRIX 
+Transition Valid? resolvedAt Set? Notes 
+LOCKED → RELEASED YES YES Normal session 
+completion 
+LOCKED → DISPUTED YES NO Dispute raised — admin 
+must resolve 
+LOCKED → REFUNDED YES YES Cancellation or no-show 
+RELEASED → LOCKED NO — must throw N/A One-way state machine 
+violation 
+DISPUTED → LOCKED NO — must throw N/A One-way state machine 
+violation 
+REFUNDED → LOCKED NO — must throw N/A One-way state machine 
+violation 
+DISPUTED → RELEASED YES (admin only) YES 
+Admin resolves 
+FAVOR_MENTOR or 
+SPLIT 
+DISPUTED → REFUNDED YES (admin only) YES Admin resolves 
+FAVOR_STUDENT 
+ 
+5. Admin Wallet & Teaching Streak 
+• Verify: Admin wallet is a real User record in the database (not a hardcoded ID like 0 or -1) 
+• Verify: Admin wallet userId is loaded from environment variable or config (not hardcoded) 
+• Verify: Tax transactions create a Transaction record: { type: TAX, fromUserId: mentor, toUserId: 
+adminWallet, amount: tax } 
+• Verify: releaseEscrow increments mentor.teachingStreak in the SAME prisma.$transaction() 
+• Verify: teachingStreak is NOT incremented in refundEscrow 
+• Verify: teachingStreak is NOT incremented in splitEscrow (dispute resolution) 
+Critical Rules Checklist — Phase 2 
+24. All 7 Jest unit tests pass 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    11 
+25. prisma.$transaction() used for EVERY financial operation (never sequential awaits) 
+26. tax = Math.floor(amount × 0.05) — never Math.round or Math.ceil 
+27. tokenBalance never goes below 0 (application-level check before DB constraint fires) 
+28. Escrow state transitions are one-way (LOCKED → RELEASED/DISPUTED/REFUNDED only) 
+29. Admin wallet is a real DB user (not a magic number or hardcoded ID) 
+30. releaseEscrow increments teachingStreak in same transaction 
+31. freezeEscrow does NOT set resolvedAt 
+32. disputeEscrow does NOT set resolvedAt 
+33. Transaction record created for EVERY balance change 
+34. BalanceCard uses animated count-up (not instant number change) 
+35. TransactionHistoryTable badge colors correct (EARN=green, SPEND=red, TAX=gray) 
+36. TanStack Query staleTime = 30_000 on all wallet queries

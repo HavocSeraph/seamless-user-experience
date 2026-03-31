@@ -1,0 +1,31 @@
+Phase 3 — Marketplace + Search + Matching + Booking 
+TABLE 7 — PHASE 3 MODEL CONFIGURATION 
+Attribute Value 
+Recommended Model Claude Sonnet 4.5 
+Reasoning Fast iteration needed for API endpoint audits, DTO 
+validation, and frontend component checks. 
+Extended Thinking Not required — but enable for booking atomicity 
+analysis. 
+ 
+Files to Load 
+• apps/backend/src/skills/skills.service.ts 
+• apps/backend/src/skills/skills.controller.ts 
+• apps/backend/src/skills/dto/create-skill.dto.ts 
+• apps/backend/src/skills/dto/search-skills.dto.ts 
+• apps/backend/src/sessions/sessions.service.ts 
+• apps/backend/src/sessions/sessions.controller.ts 
+• apps/backend/src/sessions/dto/create-session.dto.ts 
+• apps/backend/prisma/schema.prisma (Skill + Session models) 
+• apps/frontend/src/pages/marketplace/MarketplacePage.tsx 
+• apps/frontend/src/components/marketplace/SkillCard.tsx 
+• apps/frontend/src/components/marketplace/BookingModal.tsx 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    12 
+• apps/frontend/src/hooks/useMarketplace.ts 
+• apps/frontend/src/hooks/useBooking.ts 
+Beast Mode Instruction 
+"You are a senior backend engineer auditing the SkillBarter marketplace and booking system. Focus on: 
+atomicity of booking transactions, search correctness, and the 5 booking validation rules. For every bug: 
+assign severity and provide corrected code inline. Pay special attention to race conditions in concurrent 
+booking scenarios." 
+Testing Prompt —

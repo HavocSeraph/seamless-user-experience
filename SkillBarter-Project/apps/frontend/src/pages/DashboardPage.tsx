@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import api from '../lib/axios';
 
 // For the purposes of testing completion from Phase 4 to Phase 5
 export function DashboardPage() {
@@ -21,26 +22,12 @@ export function DashboardPage() {
     setErrorMsg("");
     try {
       // 1. Mark logic as Complete
-      // Because we Mocked token API in phase 4, we assume user testing via `test-room-1` might fail for actual DB IDs, 
-      // but let's map out the final calls regardless.
       console.log('Completing Session', sessionEndToReview);
-      
-      const token = localStorage.getItem('token'); // In real env
-      
-      await fetch(`http://localhost:3000/sessions/${sessionEndToReview}/complete`, {
-         method: 'POST',
-         headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      await fetch(`http://localhost:3000/sessions/${sessionEndToReview}/review`, {
-         method: 'POST',
-         headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-         },
-         body: JSON.stringify({ rating, comment })
-      });
-      
+
+      await api.post(`/sessions/${sessionEndToReview}/complete`);
+
+      await api.post(`/sessions/${sessionEndToReview}/review`, { rating, comment });
+
       alert("Feedback submitted successfully! Escrow rules invoked.");
       window.location.href = "/dashboard";
     } catch (err: any) {
@@ -54,18 +41,10 @@ export function DashboardPage() {
   const handleDispute = async () => {
     const reason = prompt("Describe the reason for the dispute:");
     if (!reason) return;
-    
+
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3000/sessions/${sessionEndToReview}/dispute`, {
-         method: 'POST',
-         headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-         },
-         body: JSON.stringify({ reason })
-      });
+      await api.post(`/sessions/${sessionEndToReview}/dispute`, { reason });
       alert('Dispute officially filed. The Escrow transaction has been frozen awaiting Admin resolution.');
       window.location.href = "/dashboard";
     } catch (err) {

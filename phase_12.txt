@@ -1,0 +1,72 @@
+Phase 1 Test Scenarios 
+1. Registration Flow 
+• Simulate: POST /auth/register with valid payload { email, password, name } 
+• Verify: bcrypt rounds = 12 (not 10, not 14 — exactly 12) 
+• Verify: 50-coin signup bonus creates a Transaction record with type=EARN, amount=50, 
+userId=newUser.id 
+• Verify: token_balance starts at 50 (not 0, not 100) 
+• Verify: passwordHash is NEVER returned in the response body 
+• Verify: ValidationPipe has whitelist: true AND forbidNonWhitelisted: true 
+• Edge case: Register with extra field { email, password, name, isAdmin: true } — must be 
+stripped/rejected 
+• Edge case: Register with same email twice — must return 409 Conflict, not 500 
+2. JWT Token Handling 
+• Verify: Access token is returned in response BODY (not Set-Cookie) 
+• Verify: Refresh token is set as httpOnly cookie (not in response body) 
+• Verify: Access token expiry = 15 minutes (900 seconds) 
+• Verify: Refresh token expiry = 7 days (604800 seconds) 
+• Verify: Frontend authStore stores ONLY the user object (id, email, name, role) — NOT the token 
+string 
+• Verify: Token is stored in memory (Zustand store) — NOT in localStorage or sessionStorage 
+• BUG CHECK: Search entire frontend codebase for localStorage.setItem — must return 0 results 
+for token storage 
+• Verify: Axios interceptor catches 401 responses, calls /auth/refresh, retries original request 
+once 
+3. OAuth2 Idempotency 
+• Simulate: User connects GitHub OAuth for the first time → verify +50 coins credited, 
+Transaction record created 
+• Simulate: Same user connects GitHub OAuth again → verify 0 additional coins (idempotent) 
+• Simulate: User connects LinkedIn OAuth → verify +50 coins credited 
+• Simulate: Same user connects LinkedIn OAuth again → verify 0 additional coins 
+• Verify: OAuth strategy checks if provider already linked before crediting bonus 
+• Verify: Total max OAuth bonus = 100 coins (50 GitHub + 50 LinkedIn), never more 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    7 
+4. ProtectedRoute Behavior 
+• Simulate: Unauthenticated user navigates to /dashboard → verify redirect to /login 
+• Simulate: Authenticated user navigates to /login → verify redirect to /dashboard (no re-login 
+loop) 
+• Verify: ProtectedRoute checks Zustand authStore, not localStorage 
+5. Prisma Schema Constraints 
+• Verify: token_balance has CHECK constraint >= 0 (cannot go negative at DB level) 
+• Verify: User.passwordHash field is NOT selected by default in any Prisma query that returns 
+user to frontend 
+• Verify: All FK relationships have correct onDelete behavior: 
+• Session → User (mentor/student): onDelete Restrict 
+• Transaction → User: onDelete Cascade 
+• Skill → User: onDelete Cascade 
+• Verify: GIN index exists on skills.search_vector 
+• Verify: Composite index exists on sessions(mentor_id, start_time) 
+• Verify: All enum types match implementation (SessionStatus, TransactionType, EscrowStatus, 
+BountyStatus) 
+6. Security Checks 
+• Attempt: GET /users/me without Authorization header → must return 401 
+• Attempt: GET /users/me with malformed JWT → must return 401 (not 500) 
+• Attempt: GET /users/me with expired JWT → must return 401 with message 'Token expired' 
+• Verify: No route accidentally exposes passwordHash in response 
+Critical Rules Checklist — Phase 1 
+11. bcrypt rounds = exactly 12 
+12. 50-coin signup bonus creates Transaction record (type=EARN) 
+13. JWT access token in response body (memory only, never localStorage) 
+14. Refresh token in httpOnly cookie only 
+15. OAuth bonus credited exactly once per provider (idempotent) 
+16. passwordHash never in any API response 
+17. ProtectedRoute redirects unauthenticated users to /login 
+18. Zustand AuthStore stores only user object (not token) 
+19. Axios interceptor handles 401 with refresh + retry 
+20. ValidationPipe has whitelist: true AND forbidNonWhitelisted: true 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    8 
+21. token_balance CHECK constraint >= 0 in Prisma schema 
+22. FK onDelete behaviors correct for all relationships 
+23. GIN index on search_vector exists

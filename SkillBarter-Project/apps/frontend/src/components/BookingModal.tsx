@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Calendar as CalendarIcon, Clock, Coins } from 'lucide-react';
+import api from '../lib/axios';
 
 export function BookingModal({ skill, isOpen, onClose }: { skill: any, isOpen: boolean, onClose: () => void }) {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -14,22 +15,14 @@ export function BookingModal({ skill, isOpen, onClose }: { skill: any, isOpen: b
       const [hours, minutes] = time.split(':');
       scheduledAt.setHours(parseInt(hours), parseInt(minutes));
 
-      const res = await fetch('http://localhost:3000/sessions/book', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          skillId: skill.id,
-          providerId: skill.userId, 
-          scheduledAt: scheduledAt.toISOString(),
-          duration: 60,
-          priceCoins: skill.priceCoins
-        })
+      const res = await api.post('/sessions/book', {
+        skillId: skill.id,
+        providerId: skill.userId,
+        scheduledAt: scheduledAt.toISOString(),
+        duration: 60,
+        priceCoins: skill.priceCoins
       });
-      if (!res.ok) throw new Error('Booking failed');
-      return res.json();
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['walletStats'] });

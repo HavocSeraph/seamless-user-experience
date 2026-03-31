@@ -1,0 +1,27 @@
+Phase 8 requires ingesting multiple large config files 
+simultaneously. Gemini 2.5 Pro's 1M token context 
+window handles this better than Claude. 
+Extended Thinking Not required — use Gemini's large context instead. 
+ 
+Files to Load 
+• apps/backend/Dockerfile 
+• apps/frontend/Dockerfile 
+• docker-compose.yml 
+• docker-compose.prod.yml 
+• nginx/nginx.conf 
+• .github/workflows/ci.yml 
+• .github/workflows/deploy.yml 
+• apps/backend/src/main.ts (Pino logger, rate limiter, helmet config) 
+• apps/backend/src/config/configuration.ts (env var validation) 
+• apps/backend/.env.example 
+• apps/frontend/.env.example 
+• redis.conf (if exists) 
+• .gitignore 
+Beast Mode Instruction 
+"You are a senior DevOps engineer auditing the SkillBarter production infrastructure. Load ALL files 
+simultaneously — use your full context window. Check: multi-stage Dockerfiles, Nginx WebSocket 
+config, CI/CD pipeline order, all 17 required env vars, Redis memory policy, Pino redaction, rate limiting. 
+For every bug: assign severity and provide corrected code/config inline." 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    24 
+Testing Prompt —

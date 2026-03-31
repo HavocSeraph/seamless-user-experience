@@ -1,0 +1,14 @@
+Phase 8 (DevOps): load ALL config files simultaneously into Gemini 2.5 Pro. Its 1M token 
+window handles the full codebase in one pass. 
+1.3 Opening System Instruction Template 
+Paste the following system instruction at the top of every testing session. Customize the phase-
+specific focus area as indicated: 
+SYSTEM INSTRUCTION: "You are a senior full-stack engineer auditing the SkillBarter platform for 
+production readiness. For every bug you find: (1) describe it precisely, (2) assign severity — CRITICAL 
+(security breach / data loss) / HIGH (broken feature) / MEDIUM (edge case) / LOW (code quality), (3) 
+provide the corrected code inline. Do not stop at reporting — fix everything. Reason step-by-step 
+through each flow before concluding. Enable extended thinking for all financial logic."  
+  
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    5 
+Section 2 — Phase-Wise Testing Prompts

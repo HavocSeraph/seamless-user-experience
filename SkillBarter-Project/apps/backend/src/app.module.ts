@@ -11,6 +11,8 @@ import { HealthModule } from './health/health.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { APP_GUARD } from '@nestjs/core';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -32,7 +34,9 @@ import { APP_GUARD } from '@nestjs/core';
     AdminModule,
     HealthModule
   ],
+  controllers: [AppController],
   providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
@@ -40,4 +44,3 @@ import { APP_GUARD } from '@nestjs/core';
   ],
 })
 export class AppModule {}
-

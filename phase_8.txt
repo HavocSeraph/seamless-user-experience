@@ -1,0 +1,49 @@
+Phase 8 — DevOps: Docker + Redis + CI/CD + Production Hardening 
+3. Section 3 — The Mega End-to-End Prompt 
+11. Part 1: The Golden Path Simulation (15 Steps) 
+12. Part 2: Security Audit 
+13. Part 3: Token Conservation Audit 
+14. Part 4: Production Readiness Check 
+4. Section 4 — UX Quality Gates Checklist 
+15. Loading States, Error Boundaries, Toast Notifications 
+16. Mobile Responsiveness, Empty States, Disabled States 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    2 
+17. Optimistic Updates, Accessibility, Visual Quality 
+5. Section 5 — Token Conservation Audit SQL Queries 
+18. 8 Diagnostic SQL Queries with Explanations 
+  
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    3 
+Section 1 — How to Use This Guide 
+This handbook is the authoritative testing reference for SkillBarter — a peer-to-peer skill exchange 
+platform powered by a SkillCoin token economy. It is structured as a phase-by-phase prompt suite 
+designed to be pasted directly into an AI coding assistant (Claude Opus 4.5, Claude Sonnet 4.5, or 
+Gemini 2.5 Pro). Each prompt is self-contained, precise, and written to surface bugs, security 
+vulnerabilities, and financial logic errors on the first pass. 
+WORKFLOW: Execute phases in order. Each phase depends on the previous. Do not skip Phase 2 
+(LedgerService) — it is the financial foundation. A bug in LedgerService means real token loss.  
+1.1 Model Selection Strategy 
+TABLE 1 — AI MODEL SELECTION BY PHASE 
+Model Use For Phases Reasoning Key Capability 
+Claude Opus 4.5 Phases 2, 4, 7 
+Deepest financial logic, 
+complex multi-step 
+flows, dispute math 
+Enable extended 
+thinking. Best for 
+LedgerService unit tests, 
+escrow state machines, 
+dispute resolution math, 
+admin ban transactions. 
+Claude Sonnet 4.5 Phases 1, 3, 5, 6 
+Fast iterative testing, API 
+endpoint audits, DTO 
+validation, frontend 
+component checks 
+Great for rapid fix-and-
+verify loops. Best for 
+auth flows, marketplace 
+search, bounty board, 
+WebSocket/notifications. 
+Gemini 2.5 Pro

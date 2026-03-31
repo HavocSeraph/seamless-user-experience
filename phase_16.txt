@@ -1,0 +1,62 @@
+Phase 3 Test Scenarios 
+1. Full-Text Search 
+• Verify: GIN index exists on skills.search_vector in Prisma schema 
+• Verify: search_vector is updated via Postgres trigger on skill insert/update 
+• Test: Search 'javascript' → returns skills with 'JavaScript' in title/description/tags 
+• Test: Search 'react typescript' → returns skills matching both terms 
+• Test: Search with empty string → returns all skills (no error) 
+• Test: Search with SQL injection attempt: "'; DROP TABLE skills; --" → sanitized, no error 
+• Verify: Search uses to_tsquery or plainto_tsquery (not LIKE %%) for performance 
+• Verify: Results ordered by ts_rank DESC (most relevant first) 
+2. The 5 Booking Validation Rules (ALL Must Be Enforced) 
+TABLE 8 — THE 5 MANDATORY BOOKING VALIDATION RULES 
+Rule # Validation Expected Error on Violation 
+1 Student cannot book their own 
+skill (self-booking blocked) 
+400 Bad Request: 'Cannot book 
+your own skill' 
+2 Student balance must be >= skill 
+price 
+400 Bad Request: 'Insufficient 
+balance' 
+3 No time overlap with existing 
+sessions for mentor 
+409 Conflict: 'Mentor unavailable 
+at this time' 
+4 No time overlap with existing 
+sessions for student 
+409 Conflict: 'You have a 
+conflicting session' 
+5 Session start_time must be in the 
+future 
+400 Bad Request: 'Cannot book 
+past time slots' 
+ 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    13 
+3. Booking Atomicity — THE MOST CRITICAL TEST 
+• Verify: Booking creation wraps BOTH operations in single prisma.$transaction(): (1) 
+LedgerService.lockEscrow() AND (2) prisma.session.create() 
+• RED FLAG: If these are sequential awaits (not in transaction), a crash between them causes 
+permanent token loss 
+• Verify: Overlap check runs BEFORE escrow lock (not after) 
+• Simulate race condition: Two students book same mentor slot simultaneously → only one 
+succeeds, the other receives 409 
+4. Skill Soft Delete 
+• Verify: DELETE /skills/:id performs soft delete (sets isActive=false, does NOT remove row) 
+• Verify: Soft-deleted skills do NOT appear in marketplace search results 
+• Verify: Hard delete is blocked (no prisma.skill.delete() calls anywhere in codebase) 
+• Verify: Existing sessions for soft-deleted skills are NOT cancelled (historical data preserved) 
+Critical Rules Checklist — Phase 3 
+37. GIN index on search_vector exists 
+38. FTS search returns correct results (not LIKE query) 
+39. Booking atomicity: escrow lock + session create in single prisma.$transaction() 
+40. Overlap check runs BEFORE escrow lock 
+41. All 5 booking validations enforced with correct error messages 
+42. Soft delete for skills (hard delete blocked) 
+43. passwordHash never in skill/user responses 
+44. URL params reflect filter state (shareable URLs) 
+45. BookingModal disabled when balance < price 
+46. TanStack Query staleTime = 30_000 on marketplace queries 
+47. Search debounced 300ms 
+48. Mentor notified via WebSocket on successful booking

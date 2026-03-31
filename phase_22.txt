@@ -1,0 +1,47 @@
+Phase 6 Test Scenarios 
+1. Redis Pub/Sub Architecture 
+• CRITICAL: Verify TWO separate ioredis instances exist (one for pub, one for sub) 
+• Verify: The same Redis client is NOT used for both publishing and subscribing 
+• Verify: Sub client calls client.subscribe() on initialization 
+• Verify: Pub client calls client.publish() to emit events 
+• RED FLAG: Single Redis client used for both pub and sub = deadlock risk — ioredis throws when 
+you call subscribe() on a client that has published 
+2. WebSocket Event Catalog 
+TABLE 13 — WEBSOCKET EVENT CATALOG 
+Event Name Emitted To Trigger 
+session.booked Mentor Student books a session 
+session.started Both participants Both join LiveKit room 
+session.completed Both participants Both mark complete 
+session.completion_pending Other participant One party marks complete 
+session.disputed Both participants Dispute raised 
+bounty.answered Poster Answer submitted 
+bounty.accepted Responder Answer accepted 
+notification.new Target user Any notification created 
+user.online Broadcast User connects WebSocket 
+user.offline Broadcast User disconnects WebSocket 
+ 
+3. Notification Persistence 
+• CRITICAL: Verify notification is saved to DB BEFORE WebSocket emit 
+• Verify: If WebSocket emit fails, notification still exists in DB (DB is source of truth) 
+• Verify: Notification has fields: id, userId, type, message, isRead, createdAt 
+• Verify: GET /notifications returns unread notifications for authenticated user 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    20 
+• Verify: POST /notifications/read-all marks all as read 
+4. Online Presence TTL 
+• Verify: User connecting WebSocket sets presence in Redis: SET user:{userId}:online 1 EX 30 
+• Verify: Heartbeat mechanism refreshes TTL every ~25 seconds (before 30s expiry) 
+• Verify: User disconnecting removes presence key (or lets it expire naturally) 
+• Verify: GET /presence/:userId returns { online: true/false } 
+• Verify: OnlinePresenceDot shows green dot for online users, gray for offline 
+Critical Rules Checklist — Phase 6 
+69. TWO Redis clients (pub and sub are separate ioredis instances) 
+70. Heartbeat keeps online status alive (30s TTL refreshed every ~25s) 
+71. Notification saved to DB BEFORE WebSocket emit 
+72. JWT validated in handleConnection (unauthenticated connections rejected immediately) 
+73. Socket rooms use pattern user:{userId} not socket.id 
+74. Reconnection config present (reconnection: true, reconnectionAttempts set) 
+75. Unread badge count correct and updates in real-time 
+76. Mark-all-read clears badge count 
+77. Online presence dot shows/hides correctly 
+78. Fallback polling every 60s if WebSocket connection fails

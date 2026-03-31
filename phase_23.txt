@@ -1,0 +1,31 @@
+Phase 7 — Admin Panel + Dispute Resolution 
+TABLE 14 — PHASE 7 MODEL CONFIGURATION 
+Attribute Value 
+Recommended Model Claude Opus 4.5 with Extended Thinking 
+Reasoning 
+Dispute resolution math (SPLIT) and ban transaction 
+(cancelling all sessions + refunding escrows atomically) 
+require deep reasoning. 
+Extended Thinking REQUIRED — trace SPLIT math step by step. 
+ 
+Files to Load 
+• apps/backend/src/admin/admin.controller.ts 
+• apps/backend/src/admin/admin.service.ts 
+• apps/backend/src/disputes/disputes.service.ts 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    21 
+• apps/backend/src/disputes/disputes.controller.ts 
+• apps/backend/src/disputes/dto/resolve-dispute.dto.ts 
+• apps/backend/src/auth/guards/roles.guard.ts 
+• apps/backend/src/auth/decorators/roles.decorator.ts 
+• apps/frontend/src/pages/admin/AdminDashboardPage.tsx 
+• apps/frontend/src/components/admin/DisputeDetailModal.tsx 
+• apps/frontend/src/components/admin/UserManagementTable.tsx 
+• apps/frontend/src/components/admin/AdminStatsCards.tsx 
+Beast Mode Instruction 
+"You are a senior security engineer auditing the SkillBarter admin panel. Enable extended thinking. For 
+dispute resolution: 1. Trace the SPLIT math step by step (must sum to escrowAmount — no token 
+creation or destruction). 2. Verify every admin route has BOTH @Roles('ADMIN') AND 
+@UseGuards(JwtAuthGuard, RolesGuard). 3. Verify ban transaction atomicity (cancel sessions + refund 
+escrows in ONE transaction). For every bug: assign severity and provide corrected code inline."  
+Testing Prompt —

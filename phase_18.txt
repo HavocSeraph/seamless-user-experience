@@ -1,0 +1,49 @@
+Phase 4 Test Scenarios 
+1. LiveKit Room Token 
+• Verify: GET /livekit/token?sessionId=X returns a valid LiveKit JWT 
+• Verify: Token includes correct roomName (session ID or derived name) 
+• Verify: Token includes correct participantName (user's display name) 
+• Verify: Token expires appropriately (not infinite TTL) 
+• Verify: Only session participants (mentor + student) can get tokens for that room 
+• Attempt: Get token for session you're not part of → must return 403 Forbidden 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    15 
+2. Both-Party Completion + Escrow Release (Atomic Flow) 
+• Simulate: Mentor clicks 'Complete' → verify mentor_completed = true, escrow NOT yet 
+released 
+• Simulate: Student clicks 'Complete' → verify student_completed = true, THEN verify ALL of the 
+following in single prisma.$transaction(): 
+• Session status → COMPLETED 
+• LedgerService.releaseEscrow() called 
+• 5% tax Math.floor'd to admin wallet 
+• Mentor balance credited (amount - tax) 
+• mentor.teachingStreak++ in SAME transaction 
+• resolvedAt set on escrow 
+• Verify: If only one party marks complete, status stays ACTIVE (not COMPLETED) 
+• Verify: Session cannot go from COMPLETED back to ACTIVE 
+3. Dispute Flow from Classroom 
+• Simulate: User clicks 'Raise Dispute' during active session 
+• Verify: Dispute record created in DB 
+• Verify: Escrow status → DISPUTED (not LOCKED, not RELEASED) 
+• Verify: resolvedAt NOT set on escrow when dispute raised 
+• Verify: Admin receives notification (WebSocket or DB notification) 
+• Verify: Both participants see 'Dispute Raised' UI state 
+• Verify: Session cannot be 'completed' while in DISPUTED state 
+4. Join Room Button State 
+• Verify: 'Join Room' button is DISABLED more than 10 minutes before session start_time 
+• Verify: 'Join Room' button becomes ACTIVE exactly 10 minutes before start_time 
+• Verify: Button state updates in real-time (not requiring page refresh) 
+• Verify: Countdown timer shows time until session starts 
+Critical Rules Checklist — Phase 4 
+49. LiveKit room token generation correct (time-gated on backend, never client-side) 
+50. 'Join Room' button only active 10 min before start_time 
+51. Session status: PENDING → ACTIVE → COMPLETED (one-way transitions only) 
+52. Both-party completion required before escrow release 
+53. Countdown timer synced via LiveKit data channel (not independent JS timers) 
+54. Monaco Editor loads and syncs correctly between participants 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    16 
+55. Excalidraw loads and syncs correctly between participants 
+56. Dispute flow: raises dispute, freezes escrow (DISPUTED), notifies admin 
+57. Rating modal appears after completion (not during dispute) 
+58. Split layout responsive across desktop/tablet/mobile

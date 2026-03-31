@@ -1,0 +1,24 @@
+Phase 8 + Mega E2E 
+Best at ingesting large 
+multi-file contexts 
+simultaneously 
+Use its 1M token context 
+window to load the 
+entire codebase. Best for 
+Docker builds, Nginx 
+config, GitHub Actions 
+pipelines, env var 
+validation. 
+ 
+1.2 Beast Mode Tips 
+6. Load full file contents into context — paste the entire file, not summaries. Summaries cause the 
+model to hallucinate missing details. 
+7. Chain prompts — use the previous AI output (including its bug list) as the next prompt's 
+context. This creates a cumulative audit trail. 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    4 
+8. Instruct the model to fix bugs inline — not just report them. The system instruction template 
+below enforces this. 
+9. For financial logic (Phase 2, 4, 7): always enable extended thinking in Claude Opus 4.5. Financial 
+bugs require step-by-step reasoning before conclusions. 
+10. For

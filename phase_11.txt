@@ -1,0 +1,32 @@
+Phase 1 — Project Setup + Auth + DB Schema 
+TABLE 2 — PHASE 1 MODEL CONFIGURATION 
+Attribute Value 
+Recommended Model Claude Sonnet 4.5 
+Reasoning Fast iterative testing of auth flows, DTO validation, and 
+schema constraints. 
+Extended Thinking Not required — auth flows are well-defined state 
+machines. 
+ 
+Files to Load 
+• apps/backend/src/auth/auth.service.ts 
+• apps/backend/src/auth/auth.controller.ts 
+• apps/backend/src/auth/auth.module.ts 
+• apps/backend/src/auth/strategies/jwt.strategy.ts 
+• apps/backend/src/auth/strategies/github.strategy.ts 
+• apps/backend/src/auth/strategies/linkedin.strategy.ts 
+• apps/backend/src/auth/dto/register.dto.ts 
+• apps/backend/src/auth/dto/login.dto.ts 
+• apps/backend/prisma/schema.prisma 
+• apps/frontend/src/store/authStore.ts 
+• apps/frontend/src/lib/axios.ts 
+• apps/frontend/src/components/ProtectedRoute.tsx 
+• apps/frontend/src/pages/auth/RegisterPage.tsx 
+• apps/frontend/src/pages/auth/LoginPage.tsx 
+Beast Mode Instruction 
+"You are a senior security engineer auditing the SkillBarter authentication system for production 
+readiness. For every bug, vulnerability, or deviation from spec you find: 1. Describe the issue precisely. 
+2. Assign severity: CRITICAL / HIGH / MEDIUM / LOW. 3. Provide the corrected code inline — do not just 
+describe the fix, write it. Reason step-by-step through each flow before concluding." 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    6 
+Testing Prompt —

@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Request, UseGuards, ForbiddenException, NotFoundException } from '@nestjs/common';
+const fs = require('fs');
+const content = `import { Controller, Get, Post, Put, Delete, Body, Param, Request, UseGuards, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -21,11 +22,11 @@ export class SkillsController {
     });
 
     try {
-      await this.prisma.$executeRaw`
+      await this.prisma.$executeRaw\`
         UPDATE "Skill" 
         SET search_vector = to_tsvector('english', title || ' ' || description || ' ' || category)
-        WHERE id = ${skill.id}::uuid
-      `;
+        WHERE id = \${skill.id}::uuid
+      \`;
     } catch (e) {}
 
     return skill;
@@ -57,11 +58,11 @@ export class SkillsController {
     });
 
     try {
-      await this.prisma.$executeRaw`
+      await this.prisma.$executeRaw\`
         UPDATE "Skill"
         SET search_vector = to_tsvector('english', title || ' ' || description || ' ' || category)
-        WHERE id = ${updated.id}::uuid
-      `;
+        WHERE id = \${updated.id}::uuid
+      \`;
     } catch(e) {}
 
     return updated;
@@ -80,3 +81,5 @@ export class SkillsController {
     });
   }
 }
+`;
+fs.writeFileSync('src/skills/skills.controller.ts', content, 'utf8');

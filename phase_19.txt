@@ -1,0 +1,28 @@
+Phase 5 — Bounty Board (Async Video Q&A) 
+TABLE 10 — PHASE 5 MODEL CONFIGURATION 
+Attribute Value 
+Recommended Model Claude Sonnet 4.5 
+Reasoning 
+Bounty flows are well-defined state machines. Fast 
+iteration needed for upload flow, escrow logic, and 
+expiry cron job. 
+Extended Thinking Not required. 
+ 
+Files to Load 
+• apps/backend/src/bounties/bounties.service.ts 
+• apps/backend/src/bounties/bounties.controller.ts 
+• apps/backend/src/bounties/dto/create-bounty.dto.ts 
+• apps/backend/src/bounties/bounty-expiry.cron.ts 
+• apps/backend/src/storage/storage.service.ts (presigned URL generation) 
+• apps/frontend/src/pages/bounties/BountyBoardPage.tsx 
+• apps/frontend/src/components/bounties/CreateBountyModal.tsx 
+• apps/frontend/src/components/bounties/BountyCard.tsx 
+• apps/frontend/src/components/bounties/VideoAnswerUploader.tsx 
+• apps/frontend/src/components/bounties/BountyDetailModal.tsx 
+Beast Mode Instruction 
+"You are a senior engineer auditing the SkillBarter bounty board system. Key focus areas: presigned URL 
+upload flow (file must NEVER route through NestJS), escrow lifecycle for bounties, and the 7 -day expiry 
+cron job idempotency. For every bug: assign severity and provide corrected code inline."  
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    17 
+Testing Prompt —

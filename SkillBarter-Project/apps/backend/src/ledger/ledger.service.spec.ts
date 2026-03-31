@@ -80,7 +80,7 @@ describe('LedgerService', () => {
     it('5. lockEscrow should lock funds successfully', async () => {
       jest.spyOn(prisma.user, 'findUniqueOrThrow').mockResolvedValue({ id: 's_1', tokenBalance: 100 } as any);
       jest.spyOn(prisma.escrow, 'create').mockResolvedValue({ id: 'esc_1' } as any);
-      await service.lockEscrow('s_1', 'm_1', 50, 'sess_1');
+      await service.lockEscrow('s_1', 'm_1', 50);
       expect(prisma.escrow.create).toHaveBeenCalled();
     });
 

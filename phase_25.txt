@@ -1,0 +1,5 @@
+Phase 8 — DevOps: Docker + Redis + CI/CD + Production Hardening 
+TABLE 16 — PHASE 8 MODEL CONFIGURATION 
+Attribute Value 
+Recommended Model Gemini 2.5 Pro 
+Reasoning

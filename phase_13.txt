@@ -1,0 +1,33 @@
+Phase 2 — Token Economy (LedgerService + Wallet Dashboard) 
+TABLE 3 — PHASE 2 MODEL CONFIGURATION 
+Attribute Value 
+Recommended Model Claude Opus 4.5 with Extended Thinking 
+Reasoning 
+Financial logic requires deep reasoning. LedgerService 
+is the most critical file — bugs here cause real token 
+loss. 
+Extended Thinking REQUIRED — enable before loading files. 
+ 
+CRITICAL: This is the most important phase in the entire test suite. A single non -atomic operation in 
+LedgerService can cause token duplication or destruction. Every financial operation MUST be wrapped 
+in prisma.$transaction(). 
+Files to Load 
+• apps/backend/src/ledger/ledger.service.ts 
+• apps/backend/src/ledger/ledger.service.spec.ts 
+• apps/backend/src/wallet/wallet.controller.ts 
+• apps/backend/src/wallet/wallet.service.ts 
+• apps/backend/prisma/schema.prisma (Transaction + Escrow models) 
+• apps/frontend/src/pages/wallet/WalletPage.tsx 
+• apps/frontend/src/components/wallet/BalanceCard.tsx 
+• apps/frontend/src/components/wallet/TransactionHistoryTable.tsx 
+• apps/frontend/src/hooks/useWallet.ts 
+Beast Mode Instruction 
+"You are a senior fintech engineer auditing the SkillBarter token economy for production readiness. This 
+is the most critical part of the codebase — bugs here cause token loss or creation out of thin air. Enable 
+extended thinking. Before answering any question about financial logic: 1. Trace the full transaction 
+flow step by step. 2. Verify atomicity (is this wrapped in prisma.$transaction()?). 3. Verify math (is tax 
+Math.floor, not Math.round?). 4. Verify state machine (are escrow transitions one -way?). 5. Then 
+provide your conclusion. For every bug: assign severity and provide corrected code inline."  
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    9 
+Testing Prompt —

@@ -1,0 +1,45 @@
+Phase 5 Test Scenarios 
+1. Presigned URL Upload Flow 
+• Verify: GET /storage/presigned-url returns a presigned URL (S3 or Cloudinary) 
+• Verify: Video file is uploaded DIRECTLY from browser to S3/Cloudinary (not through NestJS) 
+• Verify: NestJS never receives the video file bytes (no multer/file buffer in controller) 
+• Verify: After upload, client sends only the file URL/key to NestJS (not the file) 
+• Verify: File size limit enforced at storage provider level (not NestJS) 
+• RED FLAG: Any controller with @UploadedFile() for video answers is WRONG — this routes the 
+file through NestJS memory 
+2. Bounty Status Transitions 
+TABLE 11 — BOUNTY STATUS STATE MACHINE 
+From To Trigger Tax Applied? 
+OPEN ANSWERED First answer submitted No 
+ANSWERED CLOSED Poster accepts an 
+answer Yes — 5% Math.floor 
+OPEN EXPIRED 7-day cron job runs No — full refund to 
+poster 
+ANSWERED EXPIRED 7-day cron job runs No — full refund to 
+poster 
+CLOSED Any Any action BLOCKED — cannot 
+transition from CLOSED 
+ 
+3. 7-Day Expiry Cron Job 
+• Verify: Cron runs on schedule (EVERY_HOUR as per spec) 
+• Verify: Finds all bounties where status IN [OPEN, ANSWERED] AND expiresAt < now() 
+• Verify: For each expired bounty — ALL of the following in single prisma.$transaction(): 
+• Escrow refunded to poster in full (NO tax on expiry refund) 
+• Bounty status → EXPIRED 
+• Poster notified (WebSocket or DB notification) 
+• Verify: Cron is IDEMPOTENT — checks escrow.status === LOCKED before processing (skips 
+already-processed bounties) 
+• Verify: Cron does NOT expire CLOSED bounties 
+SKILLBARTER • BEAST MODE TESTING SUITE • CONFIDENTIAL 
+SkillBarter Testing Handbook — Department of Computer Engineering, University of Mumbai    |    18 
+Critical Rules Checklist — Phase 5 
+59. Bounty creation validates balance >= rewardCoins BEFORE creating bounty 
+60. Escrow locked atomically with bounty creation (single prisma.$transaction()) 
+61. Presigned URL upload: file NEVER routes through NestJS 
+62. No @UploadedFile() decorator on video answer submission endpoint 
+63. Accept answer triggers LedgerService escrow release with 5% tax 
+64. Only ONE answer can be accepted per bounty (enforced on backend) 
+65. 7-day expiry cron refunds escrow in full (no tax on expiry) 
+66. Cron is idempotent (checks escrow.status === LOCKED before processing) 
+67. Expired bounty notifies poster 
+68. BountyStatus EXPIRED set correctly by cron
