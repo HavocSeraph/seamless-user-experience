@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { CreateBountyModal } from '../../components/bounties/CreateBountyModal';
 
 export const BountyBoardPage = () => {

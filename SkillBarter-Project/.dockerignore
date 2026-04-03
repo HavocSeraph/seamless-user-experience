@@ -1,0 +1,8 @@
+node_modules
+apps/*/node_modules
+dist
+dist-tsc
+coverage
+.git
+.env
+.DS_Store

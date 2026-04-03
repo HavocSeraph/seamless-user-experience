@@ -18,6 +18,7 @@ import { StorageModule } from './storage/storage.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PresenceModule } from './presence/presence.module';
+import { DisputesModule } from './disputes/disputes.module';
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import { PresenceModule } from './presence/presence.module';
     BountiesModule,
     StorageModule,
     NotificationsModule,
-    PresenceModule
+    PresenceModule,
+    DisputesModule
   ],
   controllers: [AppController],
   providers: [

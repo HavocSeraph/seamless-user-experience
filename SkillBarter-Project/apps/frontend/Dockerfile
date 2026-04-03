@@ -11,7 +11,7 @@ RUN npm install -g pnpm
 RUN pnpm install
 
 # Build frontend
-RUN pnpm run build --filter frontend
+RUN pnpm --filter frontend build
 
 # Stage 2: Production (nginx)
 FROM nginx:alpine AS production
@@ -19,5 +19,5 @@ FROM nginx:alpine AS production
 COPY --from=builder /app/apps/frontend/dist /usr/share/nginx/html
 COPY apps/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-HEALTHCHECK --interval=30s CMD wget --spider http://localhost || exit 1
+HEALTHCHECK --interval=30s CMD wget -q -O - http://127.0.0.1/ || exit 1
 CMD ["nginx", "-g", "daemon off;"]
