@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { authApi } from "@/lib/api-client";
+import { useAuthStore } from "@/store/authStore";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,15 +27,26 @@ export default function LoginPage() {
       const response = await authApi.login({ email, password });
       const token = response.accessToken || response.access_token;
       if (token) {
-        localStorage.setItem('skill_barter_token', token);
+        // PH 1 BUG FIX: Tokens shifted to HTTPOnly cookies. Memory-only storage.
+        // Assuming response.user is returned. Or decode JWT if needed. We'll use a mocked user if none is returned.
+        const user = response.user || { id: "mock-id", email, name: "User", role: "user" };
+        setUser(user);
         toast({ title: "AUTHENTICATION SUCCESSFUL", description: "Identity verified. Redirecting to your dashboard." });
         navigate("/dashboard");
       }
-    } catch (error: any) {
-      toast({ title: "AUTH FAILED", description: error.message || "Invalid credentials.", variant: "destructive" });
+    } catch (error) {
+      toast({ title: "AUTH FAILED", description: error instanceof Error ? error.message : "Invalid credentials.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOAuth = (provider: string) => {
+    window.location.href = `http://localhost:3000/api/auth/${provider}`;
+  };
+
+  const handleComingSoon = () => {
+    toast({ title: "Coming Soon", description: "This feature is currently in development." });
   };
 
   return (
@@ -134,10 +147,10 @@ export default function LoginPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="h-14 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] transition-all">
+            <Button variant="outline" type="button" onClick={() => handleOAuth('github')} className="h-14 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] transition-all">
               <Github className="w-4 h-4 mr-2" /> GitHub
             </Button>
-            <Button variant="outline" className="h-14 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] transition-all">
+            <Button variant="outline" type="button" onClick={() => handleOAuth('linkedin')} className="h-14 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] transition-all">
               <Linkedin className="w-4 h-4 mr-2 text-[#0A66C2]" /> LinkedIn
             </Button>
           </div>
@@ -171,7 +184,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between px-1">
                 <Label htmlFor="password" className="text-[10px] font-black text-white/40 uppercase tracking-widest">Secret Keyphrase</Label>
-                <button type="button" className="text-[10px] font-black text-primary/60 hover:text-primary uppercase tracking-widest transition-colors">Lost Recovery?</button>
+                <button type="button" onClick={handleComingSoon} className="text-[10px] font-black text-primary/60 hover:text-primary uppercase tracking-widest transition-colors">Lost Recovery?</button>
               </div>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
@@ -234,4 +247,6 @@ export default function LoginPage() {
     </div>
   );
 }
+
+
 

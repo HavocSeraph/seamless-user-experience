@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Navbar } from "@/components/Navbar";
 import { mockBounties } from "@/lib/mock-data";
 import { formatDistanceToNow } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export default function BountyBoardPage() {
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
@@ -19,7 +21,7 @@ export default function BountyBoardPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0D0D12] selection:bg-primary/30 selection:text-primary">
+    <div className="min-h-dvh bg-[#0D0D12] selection:bg-primary/30 selection:text-primary">
       <Navbar isAuthenticated />
 
       <main className="container mx-auto px-4 pt-32 pb-20">
@@ -92,7 +94,7 @@ export default function BountyBoardPage() {
                 <Sparkles className="w-8 h-8 text-accent mb-4 group-hover:rotate-12 transition-transform" />
                 <h4 className="font-black text-white uppercase tracking-tight mb-2">Want to learn faster?</h4>
                 <p className="text-xs text-white/40 font-medium leading-relaxed mb-6">Create a bounty for your specific problem and let master educators help you directly.</p>
-                <Button className="w-full h-14 rounded-xl bg-accent text-black font-black uppercase tracking-widest text-[10px]">Create Your Bounty</Button>
+                <Button className="w-full h-14 rounded-xl bg-accent text-black font-black uppercase tracking-widest text-[10px]" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>Create Your Bounty</Button>
               </div>
             </div>
 

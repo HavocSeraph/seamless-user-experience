@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Clock, CheckCircle, AlertTriangle, Video, MapPin, Calendar, MoreHorizontal, Zap, Shield, ChevronRight, Activity, HardDrive } from "lucide-react";
+import { BookOpen, Clock, CheckCircle, AlertTriangle, Video, MapPin, Calendar, MoreHorizontal, Zap, Shield, ChevronRight, Activity, HardDrive, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Navbar } from "@/components/Navbar";
 import { mockSessions } from "@/lib/mock-data";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
-const statusConfig: Record<string, { color: string; icon: any; glow: string }> = {
+const statusConfig: Record<string, { color: string; icon: LucideIcon; glow: string }> = {
   PENDING: { color: "accent", icon: Clock, glow: "shadow-[0_0_15px_rgba(234,179,8,0.2)]" },
   ACTIVE: { color: "premium", icon: Video, glow: "shadow-[0_0_20px_rgba(139,92,246,0.3)]" },
   COMPLETED: { color: "success", icon: CheckCircle, glow: "shadow-[0_0_15px_rgba(34,197,94,0.1)]" },
@@ -16,12 +18,14 @@ const statusConfig: Record<string, { color: string; icon: any; glow: string }> =
 };
 
 export default function SessionsPage() {
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("upcoming");
   const upcoming = mockSessions.filter(s => ["PENDING", "ACTIVE"].includes(s.status));
   const past = mockSessions.filter(s => ["COMPLETED", "DISPUTED"].includes(s.status));
 
   return (
-    <div className="min-h-screen bg-[#0D0D12] selection:bg-primary/30 selection:text-primary">
+    <div className="min-h-dvh bg-[#0D0D12] selection:bg-primary/30 selection:text-primary">
       <Navbar isAuthenticated />
 
       <main className="container mx-auto px-4 pt-32 pb-20">
@@ -134,7 +138,7 @@ export default function SessionsPage() {
                           {/* Right: Interaction */}
                           <div className="shrink-0 flex items-center gap-4">
                             {canJoin ? (
-                              <Button className="h-16 px-10 rounded-2xl bg-kinetic-gradient text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-kinetic hover:scale-105 active:scale-95 transition-all group/btn">
+                              <Button className="h-16 px-10 rounded-2xl bg-kinetic-gradient text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-kinetic hover:scale-105 active:scale-95 transition-all group/btn" onClick={() => navigate(`/classroom/${session.id}`)}>
                                 Enter Exchange Room <Video className="w-4 h-4 ml-3 group-hover/btn:rotate-12 transition-all" />
                               </Button>
                             ) : (
@@ -142,7 +146,7 @@ export default function SessionsPage() {
                                 Room Locking... <Clock className="w-4 h-4 ml-3" />
                               </Button>
                             )}
-                            <Button variant="ghost" className="w-16 h-16 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 text-white flex items-center justify-center p-0">
+                            <Button variant="ghost" className="w-16 h-16 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 text-white flex items-center justify-center p-0" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                               <MoreHorizontal className="w-5 h-5" />
                             </Button>
                           </div>
@@ -157,7 +161,7 @@ export default function SessionsPage() {
                     <div className="bento-card py-24 text-center border-dashed border-white/10">
                       <HardDrive className="w-16 h-16 mx-auto mb-6 text-white/10" />
                       <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">No Active Exchanges Found</p>
-                      <Button variant="link" className="text-primary uppercase tracking-widest text-xs font-black mt-4">Browse Intelligence Marketplace</Button>
+                      <Button variant="link" className="text-primary uppercase tracking-widest text-xs font-black mt-4" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>Browse Intelligence Marketplace</Button>
                     </div>
                   )}
                 </div>
@@ -188,7 +192,7 @@ export default function SessionsPage() {
                             <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">{format(new Date(session.startTime), "MMM d, yyyy")}</p>
                             <div className={`text-[10px] font-black text-${config.color}-500/80 uppercase tracking-widest mt-1`}>{session.status}</div>
                           </div>
-                          <Button variant="ghost" className="w-12 h-12 rounded-xl hover:bg-white/10 text-white/20 hover:text-white">
+                          <Button variant="ghost" className="w-12 h-12 rounded-xl hover:bg-white/10 text-white/20 hover:text-white" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                             <ChevronRight className="w-5 h-5" />
                           </Button>
                         </div>
@@ -204,4 +208,8 @@ export default function SessionsPage() {
     </div>
   );
 }
+
+
+
+
 

@@ -5,6 +5,7 @@ import { Coins, Bell, Menu, X, Search, User, LogOut, LayoutDashboard, BookOpen, 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { mockUser, mockNotifications } from "@/lib/mock-data";
+import { useToast } from "@/hooks/use-toast";
 
 const navLinks = [
   { to: "/marketplace", label: "Marketplace", icon: Search },
@@ -20,7 +21,7 @@ const authLinks = [
 export function Navbar({ isAuthenticated: initialAuth = false }: { isAuthenticated?: boolean }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<typeof mockUser | null>(null);
   const location = useLocation();
   const unreadCount = mockNotifications.filter(n => !n.isRead).length;
 
@@ -95,7 +96,7 @@ export function Navbar({ isAuthenticated: initialAuth = false }: { isAuthenticat
               {/* Admin Portal Redirect - Condition: Role.ADMIN */}
               {(user?.role === 'ADMIN' || localStorage.getItem('skill_barter_role') === 'ADMIN') && (
                 <Link to="/admin">
-                  <Button variant="ghost" className="h-10 px-4 rounded-xl border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500/10 transition-all font-black uppercase tracking-tighter text-[9px] flex items-center gap-2">
+                  <Button variant="ghost" className="h-10 px-4 rounded-xl border border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500/10 transition-all font-black uppercase tracking-tighter text-[9px] flex items-center gap-2" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                     <ShieldCheck className="w-4 h-4" /> Admin Portal
                   </Button>
                 </Link>
@@ -144,10 +145,10 @@ export function Navbar({ isAuthenticated: initialAuth = false }: { isAuthenticat
           ) : (
             <div className="flex items-center gap-2">
               <Link to="/login">
-                <Button variant="ghost" className="text-white/60 hover:text-white hover:bg-white/5 font-black uppercase tracking-widest text-[10px]">Log in</Button>
+                <Button variant="ghost" className="text-white/60 hover:text-white hover:bg-white/5 font-black uppercase tracking-widest text-[10px]" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>Log in</Button>
               </Link>
               <Link to="/register">
-                <Button className="bg-kinetic-gradient text-white font-black uppercase tracking-widest text-[10px] px-8 shadow-kinetic rounded-full hover:shadow-kinetic-glow transition-all">Sign up</Button>
+                <Button className="bg-kinetic-gradient text-white font-black uppercase tracking-widest text-[10px] px-8 shadow-kinetic rounded-full hover:shadow-kinetic-glow transition-all" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>Sign up</Button>
               </Link>
             </div>
           )}
@@ -215,10 +216,10 @@ export function Navbar({ isAuthenticated: initialAuth = false }: { isAuthenticat
               ) : (
                 <div className="flex flex-col gap-4 pt-8">
                   <Link to="/register" onClick={() => setMobileOpen(false)}>
-                    <Button className="w-full h-16 text-xl font-black bg-kinetic-gradient rounded-2xl shadow-kinetic">Get Started</Button>
+                    <Button className="w-full h-16 text-xl font-black bg-kinetic-gradient rounded-2xl shadow-kinetic" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>Get Started</Button>
                   </Link>
                   <Link to="/login" onClick={() => setMobileOpen(false)}>
-                    <Button variant="ghost" className="w-full h-16 text-xl font-black text-white/50 hover:text-white">Log in</Button>
+                    <Button variant="ghost" className="w-full h-16 text-xl font-black text-white/50 hover:text-white" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>Log in</Button>
                   </Link>
                 </div>
               )}

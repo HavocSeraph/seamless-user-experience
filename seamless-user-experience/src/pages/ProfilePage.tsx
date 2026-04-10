@@ -7,12 +7,14 @@ import { Navbar } from "@/components/Navbar";
 import { SkillCard } from "@/components/SkillCard";
 import { mockUser, mockSkills } from "@/lib/mock-data";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProfilePage() {
+  const { toast } = useToast();
   const userSkills = mockSkills.slice(0, 2); // Mock: skills this user teaches
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <Navbar isAuthenticated />
       <div className="container mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -35,7 +37,7 @@ export default function ProfilePage() {
                     {mockUser.linkedinId && <span className="flex items-center gap-1"><Linkedin className="w-3.5 h-3.5" />Connected</span>}
                   </div>
                 </div>
-                <Button variant="outline" className="mt-2 sm:mt-6">Edit Profile</Button>
+                <Button variant="outline" className="mt-2 sm:mt-6" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>Edit Profile</Button>
               </div>
 
               {/* Stats row */}

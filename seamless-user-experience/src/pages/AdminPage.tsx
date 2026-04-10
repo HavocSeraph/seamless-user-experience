@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ShieldAlert, Users, Gavel, ArrowRight, CheckCircle2, XCircle, AlertTriangle, ShieldCheck } from "lucide-react";
+import { ShieldAlert, Users, Gavel, ArrowRight, CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/Navbar";
@@ -24,6 +24,7 @@ interface Dispute {
 export default function AdminPage() {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function AdminPage() {
   };
 
   const resolveDispute = async (id: string, decision: string) => {
+    setResolvingId(id);
     try {
       const token = localStorage.getItem('skill_barter_token');
       const res = await fetch(`http://localhost:3000/api/admin/disputes/${id}/resolve`, {
@@ -64,11 +66,13 @@ export default function AdminPage() {
       fetchDisputes();
     } catch (error) {
       toast({ title: "RESOLUTION FAILED", variant: "destructive", description: "Could not broadcast resolution." });
+    } finally {
+      setResolvingId(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D12] selection:bg-rose-500/30">
+    <div className="min-h-dvh bg-[#0D0D12] selection:bg-rose-500/30">
       <Navbar isAuthenticated />
       
       <main className="container mx-auto px-4 pt-32 pb-20">
@@ -166,24 +170,27 @@ export default function AdminPage() {
                       </div>
 
                       {/* Right: Actions */}
-                      <div className="p-8 lg:w-72 bg-white/[0.02] flex flex-col gap-3 justify-center">
-                        <Button 
-                          onClick={() => resolveDispute(dispute.sessionId, 'REFUND_TO_STUDENT')}
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          onClick={() => resolveDispute(dispute.sessionId, 'REFUND')}
+                          disabled={resolvingId === dispute.sessionId}    
                           className="h-12 bg-white/5 hover:bg-rose-500 hover:text-white border border-white/5 text-[9px] font-black uppercase tracking-widest transition-all"
                         >
-                          <XCircle className="w-4 h-4 mr-2" /> Full Refund
+                          {resolvingId === dispute.sessionId ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <XCircle className="w-4 h-4 mr-2" />} Full Refund
                         </Button>
                         <Button 
                           onClick={() => resolveDispute(dispute.sessionId, 'SPLIT')}
+                          disabled={resolvingId === dispute.sessionId}
                           className="h-12 bg-white/5 hover:bg-secondary hover:text-white border border-white/5 text-[9px] font-black uppercase tracking-widest transition-all"
                         >
-                          <AlertTriangle className="w-4 h-4 mr-2" /> Split 50/50
+                          {resolvingId === dispute.sessionId ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <AlertTriangle className="w-4 h-4 mr-2" />} Split 50/50
                         </Button>
                         <Button 
                           onClick={() => resolveDispute(dispute.sessionId, 'RELEASE_TO_MENTOR')}
+                          disabled={resolvingId === dispute.sessionId}
                           className="h-12 bg-rose-500 text-white shadow-lg shadow-rose-500/20 text-[9px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
                         >
-                          <Gavel className="w-4 h-4 mr-2" /> Release to Mentor
+                            {resolvingId === dispute.sessionId ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Gavel className="w-4 h-4 mr-2" />} Release to Mentor
                         </Button>
                       </div>
                     </div>

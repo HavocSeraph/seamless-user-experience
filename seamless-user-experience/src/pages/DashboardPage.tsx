@@ -8,6 +8,7 @@ import { Navbar } from "@/components/Navbar";
 import { mockUser, mockSessions, mockTransactions, mockNotifications } from "@/lib/mock-data";
 import { format } from "date-fns";
 import { authApi } from "@/lib/api-client";
+import { useToast } from "@/hooks/use-toast";
 
 const quickStats = [
   { label: "COIN BALANCE", value: mockUser.tokenBalance, unit: "STC", icon: Coins, color: "text-primary", bg: "bg-primary/10", pulse: true },
@@ -17,7 +18,8 @@ const quickStats = [
 ];
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
+  const { toast } = useToast();
+  const [user, setUser] = useState<typeof mockUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0D0D12] selection:bg-primary/30 selection:text-primary">
+    <div className="min-h-dvh bg-[#0D0D12] selection:bg-primary/30 selection:text-primary">
       <Navbar isAuthenticated />
 
       {/* Network Integrity Header - Gold Master Polish */}
@@ -101,13 +103,13 @@ export default function DashboardPage() {
             </div>
             
             <div className="flex flex-wrap gap-4 pb-2">
-              <Link to="/skills/new">
-                <Button className="h-20 px-10 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 text-white/60 hover:text-white font-black uppercase tracking-[0.2em] text-[11px] transition-all active:scale-95 shadow-xl">
+              <Link to="/profile/me">
+                <Button className="h-20 px-10 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 text-white/60 hover:text-white font-black uppercase tracking-[0.2em] text-[11px] transition-all active:scale-95 shadow-xl" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                   <Plus className="w-5 h-5 mr-3 text-primary" /> List Protocol
                 </Button>
               </Link>
               <Link to="/marketplace">
-                <Button className="h-20 px-10 rounded-3xl bg-kinetic-gradient text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-kinetic hover:shadow-kinetic-glow transition-all active:scale-95 group overflow-hidden relative">
+                <Button className="h-20 px-10 rounded-3xl bg-kinetic-gradient text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-kinetic hover:shadow-kinetic-glow transition-all active:scale-95 group overflow-hidden relative" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                   <span className="relative z-10 flex items-center">SYNCHRONIZE NOW <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" /></span>
                   <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                 </Button>
@@ -168,7 +170,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <Link to="/sessions">
-                    <Button variant="ghost" className="h-12 px-6 rounded-xl border border-white/5 bg-white/5 text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-white transition-all">
+                    <Button variant="ghost" className="h-12 px-6 rounded-xl border border-white/5 bg-white/5 text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-white transition-all" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                       Archive <Archive className="w-3.5 h-3.5 ml-2" />
                     </Button>
                   </Link>
@@ -179,7 +181,7 @@ export default function DashboardPage() {
                     <div className="text-center py-20 bg-white/[0.01] rounded-3xl border border-dashed border-white/10">
                       <Globe className="w-16 h-16 mx-auto mb-6 text-white/5 animate-spin-slow" />
                       <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">No Live Protocol Links</p>
-                      <Button variant="ghost" className="mt-6 text-primary font-black uppercase tracking-widest text-[9px]">Request Synchronization</Button>
+                      <Button variant="ghost" className="mt-6 text-primary font-black uppercase tracking-widest text-[9px]" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>Request Synchronization</Button>
                     </div>
                   ) : (
                     upcomingSessions.map((session, i) => (

@@ -1,12 +1,13 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, BookOpen, Coins, MessageSquare, Clock, ShieldCheck, Activity, Zap, Sparkles, Inbox, Archive } from "lucide-react";
+import { Bell, BookOpen, Coins, MessageSquare, Clock, ShieldCheck, Activity, Zap, Sparkles, Inbox, Archive, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/Navbar";
 import { mockNotifications } from "@/lib/mock-data";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
-const typeConfig: Record<string, { icon: any; color: string; glow: string }> = {
+const typeConfig: Record<string, { icon: LucideIcon; color: string; glow: string }> = {
   SESSION_BOOKED: { icon: BookOpen, color: "primary", glow: "shadow-[0_0_15px_rgba(139,92,246,0.3)]" },
   SESSION_REMINDER: { icon: Clock, color: "accent", glow: "shadow-[0_0_15px_rgba(234,179,8,0.2)]" },
   BOUNTY_ANSWER: { icon: MessageSquare, color: "indigo", glow: "shadow-[0_0_15px_rgba(99,102,241,0.2)]" },
@@ -14,8 +15,9 @@ const typeConfig: Record<string, { icon: any; color: string; glow: string }> = {
 };
 
 export default function NotificationsPage() {
+  const { toast } = useToast();
   return (
-    <div className="min-h-screen bg-[#0D0D12] selection:bg-primary/30 selection:text-primary">
+    <div className="min-h-dvh bg-[#0D0D12] selection:bg-primary/30 selection:text-primary">
       <Navbar isAuthenticated />
 
       <main className="container mx-auto px-4 pt-32 pb-20 max-w-2xl">
@@ -41,7 +43,7 @@ export default function NotificationsPage() {
             </div>
             
             <div className="flex items-center gap-4">
-              <Button variant="ghost" className="h-12 px-6 rounded-xl border border-white/5 bg-white/5 text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] transition-all">
+              <Button variant="ghost" className="h-12 px-6 rounded-xl border border-white/5 bg-white/5 text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] transition-all" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                 Mark All Read
               </Button>
             </div>
@@ -105,7 +107,7 @@ export default function NotificationsPage() {
 
           {/* Footer Control */}
           <div className="flex justify-center pt-8">
-            <Button variant="ghost" className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] hover:text-white transition-all flex items-center gap-3">
+            <Button variant="ghost" className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] hover:text-white transition-all flex items-center gap-3" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
               <Archive className="w-4 h-4" /> Load Encrypted Archives
             </Button>
           </div>

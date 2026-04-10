@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { mockUser, mockTransactions } from "@/lib/mock-data";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 const txTypes = ["All", "EARN", "SPEND", "BOUNTY"] as const;
 
 export default function WalletPage() {
+  const { toast } = useToast();
   const [filter, setFilter] = useState<typeof txTypes[number]>("All");
 
   const filtered = filter === "All" ? mockTransactions : mockTransactions.filter(t => t.type === filter);
@@ -42,10 +44,10 @@ export default function WalletPage() {
             </div>
             
             <div className="flex gap-4">
-              <Button className="h-16 px-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-xs transition-all active:scale-95">
+              <Button className="h-16 px-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-xs transition-all active:scale-95" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                 <Search className="w-5 h-5 mr-3 text-primary" /> Search History
               </Button>
-              <Button className="h-16 px-8 rounded-2xl bg-kinetic-gradient text-white font-black uppercase tracking-widest text-xs shadow-kinetic transition-all active:scale-95">
+              <Button className="h-16 px-8 rounded-2xl bg-kinetic-gradient text-white font-black uppercase tracking-widest text-xs shadow-kinetic transition-all active:scale-95" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                 <CreditCard className="w-5 h-5 mr-3" /> Get More STC
               </Button>
             </div>
@@ -107,7 +109,7 @@ export default function WalletPage() {
                     <p className="text-sm text-white/40 font-medium tracking-wide">Your assets are secured by community-driven verification.</p>
                   </div>
                 </div>
-                <Button variant="outline" className="h-14 px-8 rounded-xl border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[10px]">
+                <Button variant="outline" className="h-14 px-8 rounded-xl border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[10px]" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                   Vault Settings
                 </Button>
               </div>
@@ -178,7 +180,7 @@ export default function WalletPage() {
                 </div>
                 
                 <div className="mt-8 pt-8 border-t border-white/5">
-                  <Button variant="ghost" className="w-full text-[10px] font-black uppercase tracking-[0.3em] text-white/20 hover:text-white">
+                  <Button variant="ghost" className="w-full text-[10px] font-black uppercase tracking-[0.3em] text-white/20 hover:text-white" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                     Export Full Ledger <ChevronRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>

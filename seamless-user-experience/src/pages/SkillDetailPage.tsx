@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Navbar } from "@/components/Navbar";
 import { mockSkills } from "@/lib/mock-data";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SkillDetailPage() {
+  const { toast } = useToast();
   const { skillId } = useParams();
   const skill = mockSkills.find(s => s.id === skillId) || mockSkills[0];
 
   return (
-    <div className="min-h-screen bg-[#0D0D12] selection:bg-primary/30 selection:text-primary">
+    <div className="min-h-dvh bg-[#0D0D12] selection:bg-primary/30 selection:text-primary">
       <Navbar isAuthenticated />
 
       <main className="container mx-auto px-4 pt-32 pb-20">
@@ -105,7 +107,7 @@ export default function SkillDetailPage() {
                   <h2 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-4">
                     <MessageSquare className="w-6 h-6 text-accent" /> Intelligence Reports
                   </h2>
-                  <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white">
+                  <Button variant="ghost" className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                     ReadAll Reviews ({skill.reviewCount}) <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 </div>
@@ -160,13 +162,13 @@ export default function SkillDetailPage() {
                 </div>
 
                 <div className="relative z-10 space-y-4 pt-10 border-t border-white/5">
-                  <Button className="w-full h-20 rounded-2xl bg-kinetic-gradient text-white font-black uppercase tracking-[0.2em] text-xs shadow-kinetic group/btn relative overflow-hidden active:scale-95 transition-all">
+                  <Button className="w-full h-20 rounded-2xl bg-kinetic-gradient text-white font-black uppercase tracking-[0.2em] text-xs shadow-kinetic group/btn relative overflow-hidden active:scale-95 transition-all" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                     <span className="relative z-10 flex items-center justify-center gap-3">
                       Secure Booking <Zap className="w-4 h-4 fill-white animate-pulse" />
                     </span>
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
                   </Button>
-                  <Button variant="outline" className="w-full h-16 rounded-2xl border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px]">
+                  <Button variant="outline" className="w-full h-16 rounded-2xl border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px]" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                     Direct Interrogation (Message)
                   </Button>
                 </div>

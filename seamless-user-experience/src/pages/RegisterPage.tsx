@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { authApi } from "@/lib/api-client";
+import { useAuthStore } from "@/store/authStore";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -18,23 +19,28 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await authApi.register({ name, email, password });
-      const token = response.accessToken || response.access_token;
-      if (token) {
-        localStorage.setItem('skill_barter_token', token);
-        toast({ title: "PROFILE INITIALIZED", description: "Account created. 50 STC credited to your wallet." });
-        navigate("/dashboard");
-      }
-    } catch (error: any) {
-      toast({ title: "INIT FAILED", description: error.message || "Failed to establish secure link.", variant: "destructive" });
+      await authApi.register({ name, email, password });
+      
+      toast({ title: 'PROFILE INITIALIZED', description: 'Account created. Please verify your email.' });
+      navigate('/verify-email');
+    } catch (error) {
+      toast({ title: "INIT FAILED", description: error instanceof Error ? error.message : "Failed to establish secure link.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOAuth = (provider: string) => {
+    window.location.href = `http://localhost:3000/api/auth/${provider}`;
+  };
+
+  const handleComingSoon = () => {
+    toast({ title: "Coming Soon", description: "This feature is currently in development." });
   };
 
   return (
@@ -116,10 +122,10 @@ export default function RegisterPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="h-14 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] transition-all">
+            <Button variant="outline" type="button" onClick={() => handleOAuth('github')} className="h-14 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] transition-all">
               <Github className="w-4 h-4 mr-2" /> GitHub
             </Button>
-            <Button variant="outline" className="h-14 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] transition-all">
+            <Button variant="outline" type="button" onClick={() => handleOAuth('linkedin')} className="h-14 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 text-white font-black uppercase tracking-widest text-[9px] transition-all">
               <Linkedin className="w-4 h-4 mr-2 text-[#0A66C2]" /> LinkedIn
             </Button>
           </div>
@@ -228,4 +234,7 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+
+
 

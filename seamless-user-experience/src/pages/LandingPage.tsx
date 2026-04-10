@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Coins, ArrowRight, Shield, Zap, Users, Trophy, Github, Linkedin, Sparkles, Globe, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
+import { useToast } from "@/hooks/use-toast";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -27,8 +28,15 @@ const stats = [
 ];
 
 export default function LandingPage() {
+  const { toast } = useToast();
+  
+  const handleComingSoon = (e: React.MouseEvent) => {
+    e.preventDefault();
+    toast({ title: "Coming Soon", description: "This feature is currently in development." });
+  };
+
   return (
-    <div className="min-h-screen bg-[#0D0D12] selection:bg-primary/30 selection:text-primary overflow-x-hidden">
+    <div className="min-h-dvh max-w-full bg-[#0D0D12] selection:bg-primary/30 selection:text-primary overflow-x-hidden">
       <Navbar />
 
       {/* Hero Section */}
@@ -57,12 +65,12 @@ export default function LandingPage() {
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <Link to="/register">
-                <Button size="lg" className="h-14 px-10 text-lg font-bold bg-kinetic-gradient hover:opacity-90 shadow-kinetic transition-all duration-300 rounded-full">
+                <Button size="lg" className="h-14 px-10 text-lg font-bold bg-kinetic-gradient hover:opacity-90 shadow-kinetic transition-all duration-300 rounded-full" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                   Start Bartering
                 </Button>
               </Link>
               <Link to="/marketplace">
-                <Button size="lg" variant="outline" className="h-14 px-10 text-lg font-bold border-white/10 hover:bg-white/5 backdrop-blur-md rounded-full">
+                <Button size="lg" variant="outline" className="h-14 px-10 text-lg font-bold border-white/10 hover:bg-white/5 backdrop-blur-md rounded-full" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                   Browse Skills <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
@@ -162,7 +170,7 @@ export default function LandingPage() {
               Join the elite circle of mentors and learners today. Get 50 SkillCoins free upon registration.
             </p>
             <Link to="/register">
-              <Button size="lg" className="h-16 px-12 text-xl font-black bg-white text-primary hover:bg-white/90 rounded-full transition-transform hover:scale-105 active:scale-95">
+              <Button size="lg" className="h-16 px-12 text-xl font-black bg-white text-primary hover:bg-white/90 rounded-full transition-transform hover:scale-105 active:scale-95" onClick={(e) => { e.preventDefault(); toast({ title: 'Feature Unavailable', description: 'This action is currently in development before production launch.' }); }}>
                 Join Now <ArrowRight className="ml-3 w-6 h-6" />
               </Button>
             </Link>
@@ -185,8 +193,8 @@ export default function LandingPage() {
                 Revolutionizing how the world shares knowledge. No fees, no banks, just the collective intelligence of the community.
               </p>
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:border-primary transition-colors cursor-pointer"><Github className="w-5 h-5 text-white/60" /></div>
-                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:border-primary transition-colors cursor-pointer"><Linkedin className="w-5 h-5 text-white/60" /></div>
+                <div onClick={handleComingSoon} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:border-primary transition-colors cursor-pointer"><Github className="w-5 h-5 text-white/60" /></div>
+                <div onClick={handleComingSoon} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:border-primary transition-colors cursor-pointer"><Linkedin className="w-5 h-5 text-white/60" /></div>
               </div>
             </div>
             <div>
@@ -201,10 +209,10 @@ export default function LandingPage() {
             <div>
               <h4 className="font-bold text-white mb-6 uppercase tracking-wider text-sm">Company</h4>
               <ul className="space-y-4 text-white/40 text-sm">
-                <li><a href="#" className="hover:text-primary transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
+                <li><a href="/about" onClick={handleComingSoon} className="hover:text-primary transition-colors">About Us</a></li>
+                <li><a href="/about" onClick={handleComingSoon} className="hover:text-primary transition-colors">Terms of Service</a></li>
+                <li><a href="/about" onClick={handleComingSoon} className="hover:text-primary transition-colors">Privacy Policy</a></li>
+                <li><a href="/about" onClick={handleComingSoon} className="hover:text-primary transition-colors">Contact</a></li>
               </ul>
             </div>
           </div>
